@@ -1,15 +1,14 @@
 import { findPetByName } from '@src/data/index';
 import PetDetailCard from '@src/img/views/PetDetailCard';
-import { createEvent, EventsEnum, Format, useMessage } from 'alemonjs';
+import { Format, useEvent, useMessage } from 'alemonjs';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
-export default async (e: EventsEnum) => {
-  const event = createEvent({
-    event: e,
+export default async () => {
+  const [event] = useEvent({
     selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
   });
   const [message] = useMessage();
-  const text = event.MessageText?.trim() ?? '';
+  const text = event.current.MessageText?.trim() ?? '';
 
   const format = Format.create();
   const md = Format.createMarkdown();

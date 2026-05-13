@@ -1,8 +1,12 @@
 # 阿柠檬-洛克王国世界
 
+可通过以下2种方式部署运行环境
+
 `alemongo` https://github.com/lemonade-lab/alemongo
 
 `alemondesk` https://github.com/lemonade-lab/alemondesk
+
+如果你并不是熟悉阿柠檬生态设计可访问 https://alemonjs.com
 
 ### 安装
 

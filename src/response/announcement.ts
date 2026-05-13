@@ -1,7 +1,7 @@
 import { CATEGORY_TAG_MAP, fetchAnnouncementDetail, fetchAnnouncements } from '@src/data/announcement';
 import AnnouncementCard from '@src/img/views/AnnouncementCard';
 import AnnouncementDetailCard from '@src/img/views/AnnouncementDetailCard';
-import { createEvent, EventsEnum, Format, useMessage } from 'alemonjs';
+import { Format, useEvent, useMessage } from 'alemonjs';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 const TABS = ['最新', '公告', '资讯', '活动'] as const;
@@ -31,13 +31,12 @@ function parseArgs(text: string): { tab: string; idx: number } {
   return { tab: '最新', idx: 0 };
 }
 
-export default async (e: EventsEnum) => {
-  const event = createEvent({
-    event: e,
+export default async () => {
+  const [event] = useEvent({
     selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
   });
   const [message] = useMessage();
-  const text = event.MessageText?.trim() ?? '';
+  const text = event.current.MessageText?.trim() ?? '';
 
   const format = Format.create();
   const md = Format.createMarkdown();

@@ -1,4 +1,4 @@
-import router from './response/router';
+import router from './router';
 
 export default defineChildren({
   register() {

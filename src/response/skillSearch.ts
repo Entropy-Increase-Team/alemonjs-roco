@@ -1,18 +1,13 @@
 import { searchSkill } from '@src/data/index';
-import { Format, useEvent, useMessage } from 'alemonjs';
+import { Format, useMessage, useRoute } from 'alemonjs';
 
 export default () => {
-  const [event] = useEvent({
-    selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
-  });
+  const [route] = useRoute();
   const [message] = useMessage();
-  const text = event.current.MessageText?.trim() ?? '';
 
   const format = Format.create();
   const md = Format.createMarkdown();
-
-  // 提取技能名
-  const skillName = text.replace(/^[!！/#＃](?:roco|洛克)(?:技能|jn)\s*/, '').trim();
+  const skillName = String(route.param('keyword') ?? '').trim();
 
   if (!skillName) {
     md.addText('[洛克王国] 请输入技能名，例如: #洛克技能 闪光冲击');

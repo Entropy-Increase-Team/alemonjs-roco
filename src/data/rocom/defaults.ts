@@ -1,0 +1,63 @@
+import rocomDefaultConfig from './config_default.yaml';
+import rocomHelpDefaultConfig from './rocom_help_default.yaml';
+import { storeKeys } from '@src/constants/storeKeys';
+
+type RocomHelpGroup = {
+  group: string;
+  list: Array<{
+    title: string;
+    desc: string;
+  }>;
+};
+
+export const rocomDefaultConfigData = rocomDefaultConfig as unknown as Record<string, unknown>;
+
+export const rocomModuleMeta = {
+  code: 'rocom',
+  name: '洛克王国世界',
+  description: 'RoCom / NRC 游戏模块，提供档案、家园、战绩、阵容、交换大厅、查蛋与远行商人订阅能力。',
+  version: '0.2.1',
+  apiDoc: 'modules/rocom/Rocom-API.md',
+  commandPrefixes: ['+', '#洛克王国世界', '#洛克世界', '#洛克'] as string[],
+  commands: [
+    '+帮助',
+    '+wx登陆',
+    '+qq登陆',
+    '+wg账号列表',
+    '+wg切换账号',
+    '+wg删除账号',
+    '+账号列表',
+    '+档案',
+    '+uid',
+    '+家园',
+    '+刷新家园',
+    '+战绩',
+    '+精灵列表',
+    '+阵容',
+    '+查看阵容',
+    '+交换大厅',
+    '+尺寸查询',
+    '+远行商人',
+    '+订阅远行商人',
+    '+取消订阅远行商人',
+    '+查蛋',
+    '+配种'
+  ],
+  help: {
+    title: '+帮助',
+    desc: '查看洛克王国世界帮助'
+  },
+  config: {
+    storeKey: storeKeys.config.rocom
+  }
+} as const;
+
+const rocomHelpYamlGroups = rocomHelpDefaultConfig as unknown as RocomHelpGroup[];
+
+export const rocomHelpDefaultGroups = rocomHelpYamlGroups.map(group => ({
+  groupTitle: group.group,
+  menuItems: group.list.map(item => ({
+    cmd: item.title,
+    desc: item.desc
+  }))
+}));

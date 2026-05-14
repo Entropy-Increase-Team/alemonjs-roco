@@ -1,21 +1,19 @@
 import { allElements } from '@src/data/config';
 import { allPets, filterPetsByElement } from '@src/data/index';
 import PetListCard from '@src/img/views/PetListCard';
-import { Format, useEvent, useMessage } from 'alemonjs';
+import { Format, useMessage, useRoute } from 'alemonjs';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 export default async () => {
-  const [event] = useEvent({
-    selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
-  });
+  const [route] = useRoute();
   const [message] = useMessage();
-  const text = event.current.MessageText?.trim() ?? '';
 
   const format = Format.create();
   const md = Format.createMarkdown();
-
-  // 提取属性过滤参数
-  const elementName = text.replace(/^[!！/#＃](?:roco|洛克)(?:宠物|宠物列表|精灵|cwlb)\s*/, '').trim();
+  const elementName = route.rawArgs
+    .map(item => String(item).trim())
+    .filter(Boolean)
+    .join(' ');
 
   let pets = allPets;
   let filterLabel = '全部';

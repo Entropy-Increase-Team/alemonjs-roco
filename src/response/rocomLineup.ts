@@ -1,0 +1,72 @@
+import { buildRocomLineupDetailText, buildRocomLineupListText, getRocomLineupDetail, getRocomLineupList } from '@src/model/rocomLineup';
+import RocomLineupCard from '@src/img/views/RocomLineupCard';
+import { Format, useEvent, useMessage, useRoute } from 'alemonjs';
+import { renderComponentIsHtmlToBuffer } from 'jsxp';
+
+export default async () => {
+  const [event] = useEvent({
+    selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
+  });
+  const [route] = useRoute();
+  const [message] = useMessage();
+  const format = Format.create();
+  const md = Format.createMarkdown();
+  const routeKey = String(route.key ?? '').trim();
+  const rawArgs = String(route.rawArgs ?? '').trim();
+
+  try {
+    if (routeKey === '查看阵容' || routeKey === '阵容详情') {
+      const result = await getRocomLineupDetail(event, rawArgs);
+
+      const img = await renderComponentIsHtmlToBuffer(RocomLineupCard, {
+        data: {
+          mode: 'detail',
+          category: '',
+          pageNo: 1,
+          totalPages: 1,
+          lineups: [result]
+        }
+      });
+
+      if (typeof img === 'boolean') {
+        md.addText(buildRocomLineupDetailText(result));
+        format.addMarkdown(md);
+        void message.send({ format });
+
+        return;
+      }
+
+      format.addImage(img);
+    } else {
+      const result = await getRocomLineupList(event, rawArgs);
+
+      const img = await renderComponentIsHtmlToBuffer(RocomLineupCard, {
+        data: {
+          mode: 'list',
+          category: result.category,
+          pageNo: result.pageNo,
+          totalPages: result.totalPages,
+          lineups: result.lineups
+        }
+      });
+
+      if (typeof img === 'boolean') {
+        md.addText(buildRocomLineupListText(result));
+        format.addMarkdown(md);
+        void message.send({ format });
+
+        return;
+      }
+
+      format.addImage(img);
+    }
+  } catch (error) {
+    md.addText(`查询阵容失败：${error instanceof Error ? error.message : '未知错误'}`);
+    format.addMarkdown(md);
+    void message.send({ format });
+
+    return;
+  }
+
+  void message.send({ format });
+};

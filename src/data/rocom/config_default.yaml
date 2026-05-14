@@ -1,0 +1,20 @@
+rocom:
+  # 精灵列表每页数量
+  page_size: 10
+
+  # 允许查询的最大页码
+  max_page: 5
+
+lineup:
+  # 查看阵容详情时最多翻找的页数
+  detail_search_pages: 10
+
+merchant:
+  # 远行商人订阅检查 cron
+  subscription_cron: '0 */5 * * * *'
+
+  # 群订阅默认监听的商品
+  subscription_default_items:
+    - 国王球
+    - 棱镜球
+    - 炫彩精灵蛋

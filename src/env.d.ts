@@ -25,3 +25,8 @@ declare module '*.md' {
   const url: string;
   export default url;
 }
+
+declare module '*.yaml' {
+  const url: string;
+  export default url;
+}

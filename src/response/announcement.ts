@@ -1,14 +1,12 @@
 import { CATEGORY_TAG_MAP, fetchAnnouncementDetail, fetchAnnouncements } from '@src/data/announcement';
 import AnnouncementCard from '@src/img/views/AnnouncementCard';
 import AnnouncementDetailCard from '@src/img/views/AnnouncementDetailCard';
-import { Format, useEvent, useMessage } from 'alemonjs';
+import { Format, useMessage, useRoute } from 'alemonjs';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 const TABS = ['最新', '公告', '资讯', '活动'] as const;
 
-function parseArgs(text: string): { tab: string; idx: number } {
-  const suffix = text.replace(/^[!！/#＃](?:roco|洛克)公告\s*/, '').trim();
-
+function parseArgs(suffix: string): { tab: string; idx: number } {
   if (!suffix) {
     return { tab: '最新', idx: 0 };
   }
@@ -32,16 +30,18 @@ function parseArgs(text: string): { tab: string; idx: number } {
 }
 
 export default async () => {
-  const [event] = useEvent({
-    selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
-  });
+  const [route] = useRoute();
   const [message] = useMessage();
-  const text = event.current.MessageText?.trim() ?? '';
 
   const format = Format.create();
   const md = Format.createMarkdown();
 
-  const { tab, idx } = parseArgs(text);
+  const suffix = route.rawArgs
+    .map(item => String(item).trim())
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  const { tab, idx } = parseArgs(suffix);
   const tagId = CATEGORY_TAG_MAP[tab] ?? '135113';
 
   try {

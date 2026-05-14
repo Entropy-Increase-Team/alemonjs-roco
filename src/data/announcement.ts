@@ -1,3 +1,5 @@
+import { isHttpOk, requestText } from '@src/model/http';
+
 /** 公告条目 */
 export interface AnnouncementItem {
   id: number;
@@ -122,19 +124,22 @@ function resolveCategory(tagIds: string): AnnouncementItem['category'] {
 export async function fetchAnnouncements(tagId = '135110', page = 1, pageSize = 6): Promise<{ items: AnnouncementItem[]; total: number; totalPages: number }> {
   const url = buildUrl(tagId, page, pageSize);
 
-  const res = await fetch(url, {
+  const res = await requestText({
+    url,
+    method: 'GET',
     headers: {
       'User-Agent': USER_AGENT,
       Referer: 'https://rocom.qq.com/',
       Accept: '*/*'
-    }
+    },
+    timeout: 15000
   });
 
-  if (!res.ok) {
+  if (!isHttpOk(res.status)) {
     throw new Error(`公告 API 请求失败: HTTP ${res.status}`);
   }
 
-  const text = await res.text();
+  const text = res.data;
   const data = parseJsonp<NewsResponse>(text);
 
   if (data.status !== 0) {
@@ -168,19 +173,22 @@ export async function fetchAnnouncementDetail(id: number): Promise<AnnouncementD
 
   const url = `${API_BASE}public/searchNews.php?${params.toString()}`;
 
-  const res = await fetch(url, {
+  const res = await requestText({
+    url,
+    method: 'GET',
     headers: {
       'User-Agent': USER_AGENT,
       Referer: 'https://rocom.qq.com/',
       Accept: '*/*'
-    }
+    },
+    timeout: 15000
   });
 
-  if (!res.ok) {
+  if (!isHttpOk(res.status)) {
     throw new Error(`公告详情 API 请求失败: HTTP ${res.status}`);
   }
 
-  const text = await res.text();
+  const text = res.data;
   const data = parseJsonp<DetailResponse>(text);
 
   if (data.status !== 0) {

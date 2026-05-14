@@ -1,0 +1,26 @@
+import { buildRocomEggQueryText, getRocomBreedingQuery, getRocomEggQuery } from '@src/model/rocomEggs';
+import { Format, useMessage, useRoute } from 'alemonjs';
+
+export default async () => {
+  const [route] = useRoute();
+  const [message] = useMessage();
+  const format = Format.create();
+  const md = Format.createMarkdown();
+  const routeKey = String(route.key ?? '').trim();
+  const rawArgs = String(route.rawArgs ?? '').trim();
+
+  try {
+    if (routeKey === '查蛋' || routeKey === '精灵查蛋') {
+      const result = await getRocomEggQuery(rawArgs);
+
+      md.addText(buildRocomEggQueryText(result));
+    } else {
+      md.addText(getRocomBreedingQuery(rawArgs));
+    }
+  } catch (error) {
+    md.addText(error instanceof Error ? error.message : '查蛋或配种失败');
+  }
+
+  format.addMarkdown(md);
+  void message.send({ format });
+};

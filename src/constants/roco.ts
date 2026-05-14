@@ -1,16 +1,1 @@
-export const routeRules = {
-  /** 帮助 */
-  help: /^(?:!|！|\/|#|＃)(?:roco|洛克)(帮助|help)$/,
-  /** 宠物图鉴 (带宠物名) */
-  petDetail: /^(?:!|！|\/|#|＃)(?:roco|洛克)(图鉴|查询|cw)\s+(.+)$/,
-  /** 宠物列表 (可选属性过滤) */
-  petList: /^(?:!|！|\/|#|＃)(?:roco|洛克)(宠物|宠物列表|精灵|cwlb)(?:\s+(.+))?$/,
-  /** 技能搜索 */
-  skillSearch: /^(?:!|！|\/|#|＃)(?:roco|洛克)(技能|jn)\s+(.+)$/,
-  /** 属性查询 */
-  elementSearch: /^(?:!|！|\/|#|＃)(?:roco|洛克)(属性|sx)\s+(.+)$/,
-  /** 活动日历 */
-  activeDate: /^(?:!|！|\/|#|＃)(?:roco|洛克)(活动|日历|hdrl)$/,
-  /** 公告 (可选分类+序号) */
-  announcement: /^(?:!|！|\/|#|＃)(?:roco|洛克)公告(?:\s+(.+))?$/
-} as const;
+export const routeRules = {} as const;

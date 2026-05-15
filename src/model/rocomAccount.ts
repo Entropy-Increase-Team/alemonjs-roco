@@ -17,6 +17,35 @@ type RocomAccount = {
   isOnline: unknown;
 };
 
+type RocomAccountCardBadge = {
+  text: string;
+  type: 'primary' | 'valid' | 'invalid' | 'online' | 'offline';
+};
+
+export type RocomAccountCardItem = {
+  index: number;
+  bindingIndex: string;
+  nickname: string;
+  roleId: string;
+  tgpId: string;
+  loginType: string;
+  levelText: string;
+  starName: string;
+  updatedAt: string;
+  statusText: string;
+  isPrimary: boolean;
+  badges: RocomAccountCardBadge[];
+};
+
+export type RocomAccountsCardData = {
+  title: string;
+  subtitle: string;
+  bindings: RocomAccountCardItem[];
+  emptyText: string;
+  tip: string;
+  copyright: string;
+};
+
 function normalizeText(value: unknown): string {
   return String(value ?? '').trim();
 }
@@ -72,6 +101,42 @@ function formatLoginType(loginType: string): string {
 
 function getAccountName(account: RocomAccount): string {
   return account.roleName || account.roleId || account.tgpId || '未命名角色';
+}
+
+function buildStatusTags(account: RocomAccount): string[] {
+  const tags: string[] = [];
+
+  if (account.isPrimary) {
+    tags.push('主账号');
+  }
+  tags.push(account.isValid ? '有效' : '失效');
+  if (account.isOnline !== undefined) {
+    tags.push(Number(account.isOnline) === 1 ? '在线' : '离线');
+  }
+
+  return tags;
+}
+
+function buildRenderBadges(account: RocomAccount): RocomAccountCardBadge[] {
+  const badges: RocomAccountCardBadge[] = [];
+
+  if (account.isPrimary) {
+    badges.push({ text: '主账号', type: 'primary' });
+  }
+
+  badges.push({
+    text: account.isValid ? '有效' : '失效',
+    type: account.isValid ? 'valid' : 'invalid'
+  });
+
+  if (account.isOnline !== undefined) {
+    badges.push({
+      text: Number(account.isOnline) === 1 ? '在线' : '离线',
+      type: Number(account.isOnline) === 1 ? 'online' : 'offline'
+    });
+  }
+
+  return badges;
 }
 
 function formatDateTime(value: unknown): string {
@@ -131,30 +196,70 @@ export async function getRocomAccounts(event: { current: { Platform?: string; Bo
   };
 }
 
+function getSubtitle(accounts: RocomAccount[], bindingsTotal: number): string {
+  const total = Math.max(bindingsTotal, accounts.length);
+
+  if (accounts.length > 0 && total > accounts.length) {
+    return `已识别 ${accounts.length} / ${total} 个可用洛克角色`;
+  }
+
+  if (accounts.length > 0) {
+    return `当前共识别到 ${accounts.length} 个可用洛克角色`;
+  }
+
+  if (total > 0) {
+    return `当前已绑定 ${total} 个 WeGame 账号，但还没有识别到可用洛克角色`;
+  }
+
+  return '当前还没有已绑定的 WeGame 账号';
+}
+
+function getEmptyText(bindingsTotal: number): string {
+  if (bindingsTotal > 0) {
+    return '已绑定账号存在，但暂未识别到可用洛克角色';
+  }
+
+  return '暂无已绑定的 WeGame 账号';
+}
+
+export function buildRocomAccountsCardData(accounts: RocomAccount[], bindingsTotal: number): RocomAccountsCardData {
+  return {
+    title: '洛克王国世界账号列表',
+    subtitle: getSubtitle(accounts, bindingsTotal),
+    bindings: accounts.map((account, index) => ({
+      index: index + 1,
+      bindingIndex: String(account.bindingIndex || '--'),
+      nickname: getAccountName(account),
+      roleId: account.roleId || '未返回',
+      tgpId: account.tgpId || '未返回',
+      loginType: formatLoginType(account.loginType),
+      levelText: account.level !== undefined && account.level !== null && account.level !== '' ? `Lv.${account.level}` : '未返回',
+      starName: account.starName || '未返回',
+      updatedAt: formatDateTime(account.updatedAt),
+      statusText: buildStatusTags(account).join(' | '),
+      isPrimary: account.isPrimary,
+      badges: buildRenderBadges(account)
+    })),
+    emptyText: getEmptyText(bindingsTotal),
+    tip: accounts.length > 0 ? '发送 #wg切换账号 <绑定序号> 切换默认账号' : '可先发送 #wgqq登陆 或 #wgwx登陆 绑定账号',
+    copyright: 'alemonjs-roco · RoCom'
+  };
+}
+
 export function buildRocomAccountsText(accounts: RocomAccount[], bindingsTotal: number): string {
   if (accounts.length === 0) {
     return [
-      '洛克账号列表',
+      '洛克王国世界账号列表',
       bindingsTotal > 0 ? `当前已绑定 ${bindingsTotal} 个 WeGame 账号，但还没有识别到可用洛克角色` : '当前还没有已绑定的 WeGame 账号'
     ].join('\n');
   }
 
-  const lines = ['洛克账号列表', `当前共识别到 ${accounts.length} 个可用洛克角色`, ''];
+  const lines = ['洛克王国世界账号列表', `当前共识别到 ${accounts.length} 个可用洛克角色`, ''];
 
   for (const account of accounts) {
-    const tags: string[] = [];
-
-    if (account.isPrimary) {
-      tags.push('主账号');
-    }
-    tags.push(account.isValid ? '有效' : '失效');
-    if (account.isOnline !== undefined) {
-      tags.push(Number(account.isOnline) === 1 ? '在线' : '离线');
-    }
-
     lines.push(`绑定序号：${account.bindingIndex || '未返回'}`);
     lines.push(`角色昵称：${getAccountName(account)}`);
-    lines.push(`状态：${tags.join(' | ')}`);
+    lines.push(`状态：${buildStatusTags(account).join(' | ')}`);
     lines.push(`登录方式：${formatLoginType(account.loginType)}`);
     lines.push(`角色ID：${account.roleId || '未返回'}`);
     lines.push(`WeGameID：${account.tgpId || '未返回'}`);

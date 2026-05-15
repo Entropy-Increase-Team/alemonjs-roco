@@ -9,6 +9,8 @@ export default async () => {
   });
   const [route] = useRoute();
   const [message] = useMessage();
+  const statusFormat = Format.create();
+  const statusMarkdown = Format.createMarkdown();
   const format = Format.create();
   const md = Format.createMarkdown();
   const routeKey = String(route.key ?? '').trim();
@@ -16,6 +18,10 @@ export default async () => {
 
   try {
     if (routeKey.endsWith('查看阵容') || routeKey.endsWith('阵容详情')) {
+      statusMarkdown.addText(rawArgs ? `正在查询阵容 ${rawArgs} 的详情...` : '正在查询阵容详情，请稍后...');
+      statusFormat.addMarkdown(statusMarkdown);
+      void message.send({ format: statusFormat });
+
       const result = await getRocomLineupDetail(event, rawArgs);
 
       const img = await renderComponentIsHtmlToBuffer(RocomLineupCard, {
@@ -38,6 +44,10 @@ export default async () => {
 
       format.addImage(img);
     } else {
+      statusMarkdown.addText('正在查询阵容助手，请稍后...');
+      statusFormat.addMarkdown(statusMarkdown);
+      void message.send({ format: statusFormat });
+
       const result = await getRocomLineupList(event, rawArgs);
 
       const img = await renderComponentIsHtmlToBuffer(RocomLineupCard, {

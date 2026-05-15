@@ -280,7 +280,7 @@ export async function searchRocomPlayer(event: { current: { Platform?: string; B
   }
 
   if (!uid) {
-    throw new Error('未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 #洛克账号列表 或 +uid <UID>');
+    throw new Error('未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 +账号列表 或 +uid <UID>');
   }
 
   const params = await buildRuntimeScopedParams(context.userIdentifier);

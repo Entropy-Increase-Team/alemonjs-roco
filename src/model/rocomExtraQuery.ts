@@ -177,7 +177,7 @@ export async function getRocomHome(event: { current: { Platform?: string; BotId?
   const uid = await resolveRocomUid(
     event,
     `^(?:${buildPrefixPattern()})\\s*(?:家园|home|刷新家园|rehome)(?:\\s*(\\d+))?$`,
-    '未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 #洛克账号列表 或 +家园 <UID>'
+    '未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 +账号列表 或 +家园 <UID>'
   );
 
   const payload = await requestWeGame<Record<string, unknown>>('/api/v1/games/rocom/ingame/home/info', {

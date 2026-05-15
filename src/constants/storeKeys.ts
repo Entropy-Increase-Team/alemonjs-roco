@@ -20,8 +20,7 @@ export function getStoreKeyFormat(key: string): StoreKeyFormat {
 export const storeKeys = {
   config: {
     wegameCore: buildDataStoreKey('yaml', 'config', 'wegame-core'),
-    rocom: buildDataStoreKey('yaml', 'config', 'rocom'),
-    rocomHelp: buildDataStoreKey('yaml', 'config', 'rocom-help')
+    rocom: buildDataStoreKey('yaml', 'config', 'rocom')
   },
   wegame: {
     users: buildDataStoreKey('json', 'wegame', 'users')

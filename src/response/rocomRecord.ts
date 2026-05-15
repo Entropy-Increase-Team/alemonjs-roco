@@ -8,10 +8,16 @@ export default async () => {
     selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
   });
   const [message] = useMessage();
+  const statusFormat = Format.create();
+  const statusMarkdown = Format.createMarkdown();
   const format = Format.create();
   const md = Format.createMarkdown();
 
   try {
+    statusMarkdown.addText('正在查询闪耀大赛战绩，请稍后...');
+    statusFormat.addMarkdown(statusMarkdown);
+    void message.send({ format: statusFormat });
+
     const result = await getRocomRecord(event);
 
     const img = await renderComponentIsHtmlToBuffer(RocomRecordCard, {

@@ -5,6 +5,8 @@ import { Format, useMessage, useRoute } from 'alemonjs';
 export default async () => {
   const [route] = useRoute();
   const [message] = useMessage();
+  const statusFormat = Format.create();
+  const statusMarkdown = Format.createMarkdown();
   const format = Format.create();
   const md = Format.createMarkdown();
   const routeKey = String(route.key ?? '').trim();
@@ -12,6 +14,10 @@ export default async () => {
 
   try {
     if (routeKey.endsWith('远行商人') || routeKey.endsWith('旅行商人') || routeKey.endsWith('商人信息')) {
+      statusMarkdown.addText('正在查询远行商人信息...');
+      statusFormat.addMarkdown(statusMarkdown);
+      void message.send({ format: statusFormat });
+
       const result = await getRocomMerchantInfo();
 
       md.addText(buildRocomMerchantText(result));

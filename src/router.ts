@@ -14,7 +14,8 @@ const baseGroup = router.group({
   }
 });
 
-baseGroup.use(['roco帮助', '洛克帮助', 'rocohelp', '洛克help'], () => import('@src/response/rocomHelp'));
+baseGroup.use(['roco帮助', 'rocohelp'], () => import('@src/response/help'));
+baseGroup.use(['洛克帮助', '洛克help'], () => import('@src/response/rocomHelp'));
 baseGroup.use(['roco账号列表', '洛克账号列表', '洛克王国账号列表'], () => import('@src/response/rocomAccounts'));
 baseGroup.use(['roco档案', '洛克档案', '洛克王国档案'], () => import('@src/response/rocomProfile'));
 baseGroup.use(['rocouid', '洛克uid', '洛克王国uid', 'rocoUID', '洛克UID', '洛克王国UID'], () => import('@src/response/rocomSearch'));

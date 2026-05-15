@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import net from 'node:net';
+import { getConfigValue } from 'alemonjs';
 import { getIoRedis } from '@alemonjs/db';
 import { getStoreKeyFormat, type StoreKeyFormat } from '@src/constants/storeKeys';
-import { parseSimpleYaml } from '@src/model/simpleYaml';
 import YAML from 'yaml';
 
 const runtimeStoreRoot = '.data/runtime-store';
@@ -42,7 +42,7 @@ function disableRedis(reason: unknown): void {
 }
 
 function getRedisEndpoint(): { host: string; port: number } | null {
-  const config = parseSimpleYaml('alemon.config.yaml');
+  const config = getConfigValue<Record<string, unknown>>();
   const redis = (config.redis as Record<string, unknown> | undefined) ?? {};
   const host = normalizeText(redis.host);
   const port = Number(redis.port);

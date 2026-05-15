@@ -1,10 +1,11 @@
+import { getConfigValue } from 'alemonjs';
 import { rocomDefaultConfigData } from '@src/data/rocom/defaults';
 import { wegameDefaultConfigData } from '@src/data/wegame/defaults';
-import { deepMerge, parseSimpleYaml } from '@src/model/simpleYaml';
+import { deepMerge } from '@src/model/simpleYaml';
 const appConfigNamespace = 'alemonjs-roco';
 
 function readAppUserConfig(): Record<string, unknown> {
-  const root = parseSimpleYaml('alemon.config.yaml');
+  const root = getConfigValue<Record<string, unknown>>();
   const config = root[appConfigNamespace];
 
   if (!config || typeof config !== 'object' || Array.isArray(config)) {

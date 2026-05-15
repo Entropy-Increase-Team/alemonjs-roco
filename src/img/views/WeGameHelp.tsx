@@ -18,16 +18,16 @@ export interface WeGameHelpCardData {
   footerBrand: string;
 }
 
+const width = 1176;
+
 export default function WeGameHelpCard({ data }: { data: WeGameHelpCardData }) {
   return (
-    <HTML style={{ background: '#f3f5f8' }}>
+    <HTML style={{ width: `${width + 40}px`, background: '#f3f5f8' }}>
       <div
         style={{
           margin: 0,
           padding: '20px',
-          minHeight: '100vh',
-          display: 'flex',
-          justifyContent: 'center',
+          width: `${width + 40}px`,
           fontFamily: '"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif',
           color: '#111827',
           background: '#f3f5f8',
@@ -36,8 +36,7 @@ export default function WeGameHelpCard({ data }: { data: WeGameHelpCardData }) {
       >
         <main
           style={{
-            width: '100%',
-            maxWidth: '1176px',
+            width: `${width}px`,
             padding: '24px 24px 20px',
             border: '1px solid #e5e7eb',
             borderRadius: '16px',
@@ -133,7 +132,7 @@ export default function WeGameHelpCard({ data }: { data: WeGameHelpCardData }) {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 340px)',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
                   gap: '18px'
                 }}
               >

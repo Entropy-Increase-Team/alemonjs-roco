@@ -105,6 +105,43 @@ function findHelpGroups(groups: RocomHelpGroup[], titles: string[]): RocomHelpGr
   return groups.filter(group => titleSet.has(group.groupTitle));
 }
 
+function hasMenuItems(groups: RocomHelpGroup[]): boolean {
+  return groups.some(group => group.menuItems.length > 0);
+}
+
+function pickRocoMainGroups(groups: RocomHelpGroup[]): RocomHelpGroup[] {
+  const exact = findHelpGroups(groups, ['洛克王国世界']);
+
+  if (hasMenuItems(exact)) {
+    return exact;
+  }
+
+  const filtered = groups.filter(group => !['WeGame 登录', 'WeGame 管理', '图鉴资料'].includes(group.groupTitle));
+
+  if (hasMenuItems(filtered)) {
+    return filtered;
+  }
+
+  return groups;
+}
+
+function pickRocoWikiGroups(groups: RocomHelpGroup[]): RocomHelpGroup[] {
+  const exact = findHelpGroups(groups, ['图鉴资料']);
+
+  if (hasMenuItems(exact)) {
+    return exact;
+  }
+
+  const filtered = groups.filter(group => group.menuItems.some(item => item.cmd.startsWith('#roco') || item.cmd.startsWith('/roco') || item.cmd.startsWith('＃roco'))
+  );
+
+  if (hasMenuItems(filtered)) {
+    return filtered;
+  }
+
+  return groups.slice(-1);
+}
+
 export async function buildRocomHelpText(): Promise<string> {
   const groups = await getRocomHelpGroups();
   const lines = ['洛克王国世界帮助', buildRocoMainHelpSubtitle()];
@@ -121,28 +158,40 @@ export async function buildRocomHelpText(): Promise<string> {
   return lines.join('\n');
 }
 
-async function buildHelpTextByTitles(title: string, subtitle: string, groupTitles: string[]): Promise<string> {
-  const groups = findHelpGroups(await getRocomHelpGroups(), groupTitles);
-  const lines = [title, subtitle];
-
-  for (const group of groups) {
-    lines.push('');
-    lines.push(`${group.groupTitle}：`);
-
-    for (const item of group.menuItems) {
-      lines.push(item.desc ? `${item.cmd} - ${item.desc}` : item.cmd);
-    }
-  }
-
-  return lines.join('\n');
-}
-
 export function buildRocoMainHelpText(): Promise<string> {
-  return buildHelpTextByTitles('洛克王国世界帮助', buildRocoMainHelpSubtitle(), ['洛克王国世界']);
+  return (async () => {
+    const groups = pickRocoMainGroups(await getRocomHelpGroups());
+    const lines = ['洛克王国世界帮助', buildRocoMainHelpSubtitle()];
+
+    for (const group of groups) {
+      lines.push('');
+      lines.push(`${group.groupTitle}：`);
+
+      for (const item of group.menuItems) {
+        lines.push(item.desc ? `${item.cmd} - ${item.desc}` : item.cmd);
+      }
+    }
+
+    return lines.join('\n');
+  })();
 }
 
 export function buildRocoWikiHelpText(): Promise<string> {
-  return buildHelpTextByTitles('图鉴资料帮助', buildRocoWikiHelpSubtitle(), ['图鉴资料']);
+  return (async () => {
+    const groups = pickRocoWikiGroups(await getRocomHelpGroups());
+    const lines = ['图鉴资料帮助', buildRocoWikiHelpSubtitle()];
+
+    for (const group of groups) {
+      lines.push('');
+      lines.push(`${group.groupTitle}：`);
+
+      for (const item of group.menuItems) {
+        lines.push(item.desc ? `${item.cmd} - ${item.desc}` : item.cmd);
+      }
+    }
+
+    return lines.join('\n');
+  })();
 }
 
 export async function getRocomHelpCardData() {
@@ -177,7 +226,7 @@ export async function getWeGameHelpCardData() {
 
 export async function getRocoWikiHelpCardData() {
   const groups = await getRocomHelpGroups();
-  const picked = findHelpGroups(groups, ['图鉴资料']);
+  const picked = pickRocoWikiGroups(groups);
   const subtitle = buildRocoWikiHelpSubtitle();
 
   return {
@@ -193,7 +242,7 @@ export async function getRocoWikiHelpCardData() {
 
 export async function getRocoMainHelpCardData() {
   const groups = await getRocomHelpGroups();
-  const picked = findHelpGroups(groups, ['洛克王国世界']);
+  const picked = pickRocoMainGroups(groups);
   const subtitle = buildRocoMainHelpSubtitle();
 
   return {

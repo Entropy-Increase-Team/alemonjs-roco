@@ -27,9 +27,10 @@ const width = 780;
 
 export default function YunzaiHelpCard({ data }: { data: HelpCardData }) {
   return (
-    <HTML style={{ background: '#faf6ed' }}>
+    <HTML style={{ width: `${width + 60}px`, background: '#faf6ed' }}>
       <div
         style={{
+          width: `${width + 60}px`,
           padding: '30px',
           backgroundColor: '#faf6ed',
           display: 'inline-block',
@@ -103,75 +104,94 @@ export default function YunzaiHelpCard({ data }: { data: HelpCardData }) {
                 gap: '25px'
               }}
             >
-              {data.categories.map((group, index) => (
-                <div key={`${group.title}-${index}`}>
-                  <div
-                    style={{
-                      fontSize: '22px',
-                      fontWeight: 800,
-                      color: '#c97926',
-                      marginBottom: '15px',
-                      paddingLeft: '12px',
-                      borderLeft: '5px solid #ffc65f'
-                    }}
-                  >
-                    {group.title}
-                  </div>
+              {data.categories.length > 0 ? (
+                data.categories.map((group, index) => (
+                  <div key={`${group.title}-${index}`}>
+                    <div
+                      style={{
+                        fontSize: '22px',
+                        fontWeight: 800,
+                        color: '#c97926',
+                        marginBottom: '15px',
+                        paddingLeft: '12px',
+                        borderLeft: '5px solid #ffc65f'
+                      }}
+                    >
+                      {group.title}
+                    </div>
 
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(2, 1fr)',
-                      gap: '15px'
-                    }}
-                  >
-                    {group.items.map((item, itemIndex) => (
-                      <div
-                        key={`${group.title}-${item.title}-${itemIndex}`}
-                        style={{
-                          width: '100%',
-                          height: '85px',
-                          background: 'linear-gradient(180deg, rgba(246, 237, 219, 0.98) 0%, rgba(238, 227, 205, 0.98) 100%)',
-                          border: '1px solid rgba(196, 169, 129, 0.45)',
-                          borderRadius: '16px',
-                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '0 25px',
-                          paddingRight: '50px',
-                          boxSizing: 'border-box'
-                        }}
-                      >
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div
-                            style={{
-                              fontSize: '20px',
-                              fontWeight: 800,
-                              color: '#5a3e1b',
-                              marginBottom: '8px',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              lineHeight: 1.1
-                            }}
-                          >
-                            {item.title}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: '14px',
-                              color: '#8c7a61',
-                              lineHeight: 1.35
-                            }}
-                          >
-                            {item.desc}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gap: '15px'
+                      }}
+                    >
+                      {group.items.map((item, itemIndex) => (
+                        <div
+                          key={`${group.title}-${item.title}-${itemIndex}`}
+                          style={{
+                            width: '100%',
+                            height: '85px',
+                            background: 'linear-gradient(180deg, rgba(246, 237, 219, 0.98) 0%, rgba(238, 227, 205, 0.98) 100%)',
+                            border: '1px solid rgba(196, 169, 129, 0.45)',
+                            borderRadius: '16px',
+                            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '0 25px',
+                            paddingRight: '50px',
+                            boxSizing: 'border-box'
+                          }}
+                        >
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div
+                              style={{
+                                fontSize: '20px',
+                                fontWeight: 800,
+                                color: '#5a3e1b',
+                                marginBottom: '8px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                lineHeight: 1.1
+                              }}
+                            >
+                              {item.title}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '14px',
+                                color: '#8c7a61',
+                                lineHeight: 1.35
+                              }}
+                            >
+                              {item.desc}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    minHeight: '180px',
+                    borderRadius: '18px',
+                    border: '1px dashed rgba(196, 169, 129, 0.65)',
+                    background: 'rgba(255,255,255,0.42)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#8c7a61',
+                    fontSize: '18px',
+                    fontWeight: 700
+                  }}
+                >
+                  暂无可展示的帮助项
                 </div>
-              ))}
+              )}
             </main>
 
             <div

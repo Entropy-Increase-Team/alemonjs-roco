@@ -1,6 +1,4 @@
-import MENU_BG from '../../../plugins/WeGame-plugin/modules/rocom/resources/img/ercode-bg.D1ccSQKH.png';
-import PLAYER_BG from '../../../plugins/WeGame-plugin/modules/rocom/resources/img/player-bg.png';
-import XIAOLUOKE from '../../../plugins/WeGame-plugin/modules/rocom/resources/img/小洛克.png';
+import MENU_BG from '@src/assets/bg/image3.png';
 import React from 'react';
 import HTML from './HTML.js';
 
@@ -44,22 +42,27 @@ export default function YunzaiHelpCard({ data }: { data: HelpCardData }) {
             position: 'relative',
             padding: '40px 50px',
             boxSizing: 'border-box',
-            background: `url(${MENU_BG}) no-repeat center center / 100% 100%`
+            background: `linear-gradient(rgba(250, 246, 237, 0.9), rgba(250, 246, 237, 0.94)), url(${MENU_BG}) no-repeat center center / cover`,
+            borderRadius: '20px',
+            boxShadow: '0 12px 30px rgba(66, 48, 24, 0.12)'
           }}
         >
-          <img
-            src={XIAOLUOKE}
-            alt=''
+          <div
             style={{
               position: 'absolute',
-              bottom: '-15px',
-              right: '-30px',
-              width: '320px',
-              opacity: 0.15,
+              right: '26px',
+              bottom: '18px',
+              fontSize: '92px',
+              fontWeight: 900,
+              color: 'rgba(180, 146, 95, 0.1)',
+              letterSpacing: '6px',
               zIndex: 1,
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              userSelect: 'none'
             }}
-          />
+          >
+            洛克
+          </div>
 
           <div style={{ position: 'relative', zIndex: 2 }}>
             <div
@@ -128,7 +131,10 @@ export default function YunzaiHelpCard({ data }: { data: HelpCardData }) {
                         style={{
                           width: '100%',
                           height: '85px',
-                          background: `url(${PLAYER_BG}) no-repeat center center / 100% 100%`,
+                          background: 'linear-gradient(180deg, rgba(246, 237, 219, 0.98) 0%, rgba(238, 227, 205, 0.98) 100%)',
+                          border: '1px solid rgba(196, 169, 129, 0.45)',
+                          borderRadius: '16px',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7)',
                           display: 'flex',
                           alignItems: 'center',
                           padding: '0 25px',

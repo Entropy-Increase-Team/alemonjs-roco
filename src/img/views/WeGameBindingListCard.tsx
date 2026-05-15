@@ -121,7 +121,7 @@ export default function WeGameBindingListCard({ data }: { data: WeGameBindingLis
                         >
                           绑定{item.index}/{item.total}
                         </span>
-                        {item.badges.map(badge => (
+                        {(item.badges || []).map(badge => (
                           <span
                             key={`${item.index}-${badge.type}-${badge.text}`}
                             style={{

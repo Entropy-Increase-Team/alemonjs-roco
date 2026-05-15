@@ -4,6 +4,29 @@ const router = Router.create({
   events: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
 });
 
+const rocoQuickGroup = router.group({
+  routeText: {
+    prefixes: ['+'],
+    stripPrefix: true
+  },
+  keyPolicy: {
+    maxWords: 1
+  }
+});
+
+rocoQuickGroup.use(['帮助', 'help'], () => import('@src/response/rocomHelp'));
+rocoQuickGroup.use(['账号列表'], () => import('@src/response/rocomAccounts'));
+rocoQuickGroup.use(['档案'], () => import('@src/response/rocomProfile'));
+rocoQuickGroup.use(['uid', 'UID'], () => import('@src/response/rocomSearch'));
+rocoQuickGroup.use(['家园', 'home', '刷新家园', 'rehome'], () => import('@src/response/rocomHome'));
+rocoQuickGroup.use(['大赛战绩', '战绩'], () => import('@src/response/rocomRecord'));
+rocoQuickGroup.use(['精灵列表'], () => import('@src/response/rocomPets'));
+rocoQuickGroup.use(['查看阵容', '阵容详情', '阵容'], () => import('@src/response/rocomLineup'));
+rocoQuickGroup.use(['交换大厅', '大厅'], () => import('@src/response/rocomExchange'));
+rocoQuickGroup.use(['订阅远行商人', '订阅旅行商人', '取消订阅远行商人', '取消订阅旅行商人'], () => import('@src/response/rocomMerchantSubscription'));
+rocoQuickGroup.use(['尺寸查询', '精灵尺寸', '远行商人', '旅行商人', '商人信息'], () => import('@src/response/rocomTools'));
+rocoQuickGroup.use(['查蛋', '精灵查蛋', '配种'], () => import('@src/response/rocomEggs'));
+
 const baseGroup = router.group({
   routeText: {
     prefixes: ['#', '＃', '/'],
@@ -14,8 +37,7 @@ const baseGroup = router.group({
   }
 });
 
-baseGroup.use(['roco帮助', 'rocohelp'], () => import('@src/response/help'));
-baseGroup.use(['洛克帮助', '洛克help'], () => import('@src/response/help'));
+baseGroup.use(['roco帮助', 'rocohelp', '洛克帮助', '洛克help'], () => import('@src/response/rocomHelp'));
 baseGroup.use(['roco账号列表', '洛克账号列表', '洛克王国账号列表'], () => import('@src/response/rocomAccounts'));
 baseGroup.use(['roco档案', '洛克档案', '洛克王国档案'], () => import('@src/response/rocomProfile'));
 baseGroup.use(['rocouid', '洛克uid', '洛克王国uid', 'rocoUID', '洛克UID', '洛克王国UID'], () => import('@src/response/rocomSearch'));
@@ -257,7 +279,11 @@ baseGroup.use(
   () => import('@src/response/active')
 );
 baseGroup.use(['roco公告', '洛克公告', '洛克王国公告'], () => import('@src/response/announcement'));
-baseGroup.use(['wg帮助', 'wghelp'], () => import('@src/response/help'));
+
+/**
+ * WeGame相关功能
+ */
+baseGroup.use(['wg帮助', 'wghelp'], () => import('@src/response/wegameHelp'));
 baseGroup.use(['wg配置'], () => import('@src/response/wegameConfig'));
 baseGroup.use(['wg模块下载'], () => import('@src/response/wegameModuleDownload'));
 baseGroup.use(['wg模块'], () => import('@src/response/wegameModules'));
@@ -283,28 +309,5 @@ baseGroup.use(
   },
   () => import('@src/response/wegameAccount')
 );
-
-const rocoQuickGroup = router.group({
-  routeText: {
-    prefixes: ['+'],
-    stripPrefix: true
-  },
-  keyPolicy: {
-    maxWords: 1
-  }
-});
-
-rocoQuickGroup.use(['帮助', 'help'], () => import('@src/response/help'));
-rocoQuickGroup.use(['账号列表'], () => import('@src/response/rocomAccounts'));
-rocoQuickGroup.use(['档案'], () => import('@src/response/rocomProfile'));
-rocoQuickGroup.use(['uid', 'UID'], () => import('@src/response/rocomSearch'));
-rocoQuickGroup.use(['家园', 'home', '刷新家园', 'rehome'], () => import('@src/response/rocomHome'));
-rocoQuickGroup.use(['大赛战绩', '战绩'], () => import('@src/response/rocomRecord'));
-rocoQuickGroup.use(['精灵列表'], () => import('@src/response/rocomPets'));
-rocoQuickGroup.use(['查看阵容', '阵容详情', '阵容'], () => import('@src/response/rocomLineup'));
-rocoQuickGroup.use(['交换大厅', '大厅'], () => import('@src/response/rocomExchange'));
-rocoQuickGroup.use(['订阅远行商人', '订阅旅行商人', '取消订阅远行商人', '取消订阅旅行商人'], () => import('@src/response/rocomMerchantSubscription'));
-rocoQuickGroup.use(['尺寸查询', '精灵尺寸', '远行商人', '旅行商人', '商人信息'], () => import('@src/response/rocomTools'));
-rocoQuickGroup.use(['查蛋', '精灵查蛋', '配种'], () => import('@src/response/rocomEggs'));
 
 export default router.define;

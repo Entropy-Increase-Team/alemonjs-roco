@@ -57,6 +57,18 @@ export function parseYamlResource<T = unknown>(resource: URL): T {
   return parseYamlText<T>(fs.readFileSync(resource, 'utf8'));
 }
 
+export function parseImportedYamlResource<T = unknown>(resource: unknown): T {
+  if (typeof resource === 'string') {
+    return parseYamlText<T>(fs.readFileSync(resource, 'utf8'));
+  }
+
+  if (resource instanceof URL) {
+    return parseYamlResource<T>(resource);
+  }
+
+  return (resource ?? {}) as T;
+}
+
 export function deepMerge<T extends Record<string, unknown>>(base: T, override: Record<string, unknown>): T {
   const result: Record<string, unknown> = { ...base };
 

@@ -1,6 +1,7 @@
 import rocomDefaultConfig from './config_default.yaml';
 import rocomHelpDefaultConfig from './rocom_help_default.yaml';
 import { storeKeys } from '@src/constants/storeKeys';
+import { parseImportedYamlResource } from '@src/model/simpleYaml';
 
 type RocomHelpGroup = {
   group: string;
@@ -53,7 +54,7 @@ function normalizeRocomHelpGroups(input: unknown): RocomHelpGroup[] {
     .filter((group): group is RocomHelpGroup => Boolean(group));
 }
 
-export const rocomDefaultConfigData = rocomDefaultConfig as unknown as Record<string, unknown>;
+export const rocomDefaultConfigData = parseImportedYamlResource<Record<string, unknown>>(rocomDefaultConfig);
 
 export const rocomModuleMeta = {
   code: 'rocom',
@@ -90,7 +91,7 @@ export const rocomModuleMeta = {
   }
 } as const;
 
-const rocomHelpYamlGroups = normalizeRocomHelpGroups(rocomHelpDefaultConfig);
+const rocomHelpYamlGroups = normalizeRocomHelpGroups(parseImportedYamlResource(rocomHelpDefaultConfig));
 
 export const rocomHelpDefaultGroups = rocomHelpYamlGroups.map(group => ({
   groupTitle: group.group,

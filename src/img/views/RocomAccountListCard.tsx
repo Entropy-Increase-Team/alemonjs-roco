@@ -125,7 +125,7 @@ export default function RocomAccountListCard({ data }: { data: RocomAccountsCard
                         >
                           绑定{item.bindingIndex}
                         </span>
-                        {item.badges.map(badge => (
+                        {(item.badges || []).map(badge => (
                           <span
                             key={`${item.index}-${badge.type}-${badge.text}`}
                             style={{

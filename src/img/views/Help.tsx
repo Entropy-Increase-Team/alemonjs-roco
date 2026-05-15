@@ -1,4 +1,3 @@
-import MENU_BG from '@src/assets/bg/image3.png';
 import React from 'react';
 import HTML from './HTML.js';
 
@@ -43,7 +42,8 @@ export default function ALemonJSHelpCard({ data }: { data: HelpCardData }) {
             position: 'relative',
             padding: '40px 50px',
             boxSizing: 'border-box',
-            background: `linear-gradient(rgba(250, 246, 237, 0.9), rgba(250, 246, 237, 0.94)), url(${MENU_BG}) no-repeat center center / cover`,
+            background:
+              'radial-gradient(circle at 15% 12%, rgba(255, 227, 170, 0.48), transparent 26%), radial-gradient(circle at 85% 18%, rgba(218, 181, 120, 0.2), transparent 28%), linear-gradient(180deg, rgba(250, 246, 237, 0.98) 0%, rgba(244, 235, 218, 0.98) 100%)',
             borderRadius: '20px',
             boxShadow: '0 12px 30px rgba(66, 48, 24, 0.12)'
           }}

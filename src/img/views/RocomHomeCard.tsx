@@ -175,7 +175,7 @@ export default function RocomHomeCard({ data }: { data: RocomHomeCardData }) {
               margin: '20px 44px 0'
             }}
           >
-            {data.summaryCards.map(item => (
+            {(data.summaryCards || []).map(item => (
               <div
                 key={item.label}
                 style={{
@@ -239,8 +239,8 @@ export default function RocomHomeCard({ data }: { data: RocomHomeCardData }) {
                         }}
                       >
                         <span style={{ color: '#8c7354', fontSize: '15px' }}>守卫精灵</span>
-                        {data.guardPets.length ? (
-                          data.guardPets.map(item => (
+                        {(data.guardPets || []).length ? (
+                          (data.guardPets || []).map(item => (
                             <React.Fragment key={`${item.id}-${item.name}-guard-inline`}>
                               <span
                                 style={{
@@ -289,9 +289,9 @@ export default function RocomHomeCard({ data }: { data: RocomHomeCardData }) {
                   </span>
                 </div>
 
-                {data.gardenPlots.length ? (
+                {(data.gardenPlots || []).length ? (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
-                    {data.gardenPlots.map(item => (
+                    {(data.gardenPlots || []).map(item => (
                       <article
                         key={`${item.id}-${item.landIndex}`}
                         style={{
@@ -415,9 +415,9 @@ export default function RocomHomeCard({ data }: { data: RocomHomeCardData }) {
                 </span>
               </div>
 
-              {data.indoorPets.length ? (
+              {(data.indoorPets || []).length ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {data.indoorPets.map(item => (
+                  {(data.indoorPets || []).map(item => (
                     <article
                       key={`${item.id}-${item.name}-indoor`}
                       style={{

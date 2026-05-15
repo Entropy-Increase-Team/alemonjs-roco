@@ -1,5 +1,4 @@
-import { getWeGameUserContext, requestWeGame, resolveActiveWeGameCredential } from '@src/model/wegameAccount';
-import { getRocomCommandPrefixes } from '@src/model/rocom';
+import { requestWeGame, resolveActiveWeGameCredential, type WeGameContext } from '@src/model/wegameAccount';
 
 type ExchangePoster = {
   userName: string;
@@ -46,16 +45,6 @@ function resolveAccountType(loginType?: string): string | undefined {
   return undefined;
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function buildPrefixPattern(): string {
-  return getRocomCommandPrefixes()
-    .map(item => escapeRegExp(item))
-    .join('|');
-}
-
 function formatPosterTime(value: unknown): string {
   const numeric = Number(value);
 
@@ -75,8 +64,7 @@ function formatPosterTime(value: unknown): string {
 }
 
 function parseExchangeArgs(text: string): { pageNo: number; refresh: boolean } {
-  const matched = text.match(new RegExp(`^(?:${buildPrefixPattern()})\\s*(?:交换大厅|大厅)(?:\\s+(.+))?$`, 'u'));
-  const raw = normalizeText(matched?.[1]);
+  const raw = normalizeText(text);
 
   if (!raw) {
     return {
@@ -134,9 +122,8 @@ function normalizePoster(poster: Record<string, unknown>): ExchangePoster {
   };
 }
 
-export async function getRocomExchangeHall(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }) {
-  const args = parseExchangeArgs(event.current.MessageText ?? '');
-  const context = getWeGameUserContext(event);
+export async function getRocomExchangeHall(context: WeGameContext, rawArgs = '') {
+  const args = parseExchangeArgs(rawArgs);
   const { credential } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {

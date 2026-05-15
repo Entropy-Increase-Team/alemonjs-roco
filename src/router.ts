@@ -21,15 +21,19 @@ rocoQuickGroup.use(['uid', 'UID'], () => import('@src/response/rocomSearch'));
 rocoQuickGroup.use(['家园', 'home', '刷新家园', 'rehome'], () => import('@src/response/rocomHome'));
 rocoQuickGroup.use(['大赛战绩', '战绩'], () => import('@src/response/rocomRecord'));
 rocoQuickGroup.use(['精灵列表'], () => import('@src/response/rocomPets'));
-rocoQuickGroup.use(['查看阵容', '阵容详情', '阵容'], () => import('@src/response/rocomLineup'));
+rocoQuickGroup.use(['查看阵容', '阵容详情'], () => import('@src/response/rocomLineupDetail'));
+rocoQuickGroup.use(['阵容'], () => import('@src/response/rocomLineupList'));
 rocoQuickGroup.use(['交换大厅', '大厅'], () => import('@src/response/rocomExchange'));
-rocoQuickGroup.use(['订阅远行商人', '订阅旅行商人', '取消订阅远行商人', '取消订阅旅行商人'], () => import('@src/response/rocomMerchantSubscription'));
-rocoQuickGroup.use(['尺寸查询', '精灵尺寸', '远行商人', '旅行商人', '商人信息'], () => import('@src/response/rocomTools'));
-rocoQuickGroup.use(['查蛋', '精灵查蛋', '配种'], () => import('@src/response/rocomEggs'));
+rocoQuickGroup.use(['订阅远行商人', '订阅旅行商人'], () => import('@src/response/rocomMerchantSubscribe'));
+rocoQuickGroup.use(['取消订阅远行商人', '取消订阅旅行商人'], () => import('@src/response/rocomMerchantUnsubscribe'));
+rocoQuickGroup.use(['尺寸查询', '精灵尺寸'], () => import('@src/response/rocomSize'));
+rocoQuickGroup.use(['远行商人', '旅行商人', '商人信息'], () => import('@src/response/rocomMerchant'));
+rocoQuickGroup.use(['查蛋', '精灵查蛋'], () => import('@src/response/rocomEggQuery'));
+rocoQuickGroup.use(['配种'], () => import('@src/response/rocomBreeding'));
 
 const baseGroup = router.group({
   routeText: {
-    prefixes: ['#', '＃', '/'],
+    prefixes: ['/', '#', '＃'],
     stripPrefix: true
   },
   keyPolicy: {
@@ -61,51 +65,29 @@ baseGroup.use(
 baseGroup.use(['roco大赛战绩', '洛克大赛战绩', '洛克王国大赛战绩', 'roco战绩', '洛克战绩', '洛克王国战绩'], () => import('@src/response/rocomRecord'));
 baseGroup.use(['roco精灵列表', '洛克精灵列表', '洛克王国精灵列表'], () => import('@src/response/rocomPets'));
 baseGroup.use(
-  ['roco查看阵容', '洛克查看阵容', '洛克王国查看阵容', 'roco阵容详情', '洛克阵容详情', '洛克王国阵容详情', 'roco阵容', '洛克阵容', '洛克王国阵容'],
-  () => import('@src/response/rocomLineup')
+  ['roco查看阵容', '洛克查看阵容', '洛克王国查看阵容', 'roco阵容详情', '洛克阵容详情', '洛克王国阵容详情'],
+  () => import('@src/response/rocomLineupDetail')
 );
+baseGroup.use(['roco阵容', '洛克阵容', '洛克王国阵容'], () => import('@src/response/rocomLineupList'));
 baseGroup.use(['roco交换大厅', '洛克交换大厅', '洛克王国交换大厅', 'roco大厅', '洛克大厅', '洛克王国大厅'], () => import('@src/response/rocomExchange'));
 baseGroup.use(
-  [
-    'roco订阅远行商人',
-    '洛克订阅远行商人',
-    '洛克王国订阅远行商人',
-    'roco订阅旅行商人',
-    '洛克订阅旅行商人',
-    '洛克王国订阅旅行商人',
-    'roco取消订阅远行商人',
-    '洛克取消订阅远行商人',
-    '洛克王国取消订阅远行商人',
-    'roco取消订阅旅行商人',
-    '洛克取消订阅旅行商人',
-    '洛克王国取消订阅旅行商人'
-  ],
-  () => import('@src/response/rocomMerchantSubscription')
+  ['roco订阅远行商人', '洛克订阅远行商人', '洛克王国订阅远行商人', 'roco订阅旅行商人', '洛克订阅旅行商人', '洛克王国订阅旅行商人'],
+  () => import('@src/response/rocomMerchantSubscribe')
 );
 baseGroup.use(
-  [
-    'roco尺寸查询',
-    '洛克尺寸查询',
-    '洛克王国尺寸查询',
-    'roco精灵尺寸',
-    '洛克精灵尺寸',
-    '洛克王国精灵尺寸',
-    'roco远行商人',
-    '洛克远行商人',
-    '洛克王国远行商人',
-    'roco旅行商人',
-    '洛克旅行商人',
-    '洛克王国旅行商人',
-    'roco商人信息',
-    '洛克商人信息',
-    '洛克王国商人信息'
-  ],
-  () => import('@src/response/rocomTools')
+  ['roco取消订阅远行商人', '洛克取消订阅远行商人', '洛克王国取消订阅远行商人', 'roco取消订阅旅行商人', '洛克取消订阅旅行商人', '洛克王国取消订阅旅行商人'],
+  () => import('@src/response/rocomMerchantUnsubscribe')
 );
 baseGroup.use(
-  ['roco查蛋', '洛克查蛋', '洛克王国查蛋', 'roco精灵查蛋', '洛克精灵查蛋', '洛克王国精灵查蛋', 'roco配种', '洛克配种', '洛克王国配种'],
-  () => import('@src/response/rocomEggs')
+  ['roco尺寸查询', '洛克尺寸查询', '洛克王国尺寸查询', 'roco精灵尺寸', '洛克精灵尺寸', '洛克王国精灵尺寸'],
+  () => import('@src/response/rocomSize')
 );
+baseGroup.use(
+  ['roco远行商人', '洛克远行商人', '洛克王国远行商人', 'roco旅行商人', '洛克旅行商人', '洛克王国旅行商人', 'roco商人信息', '洛克商人信息', '洛克王国商人信息'],
+  () => import('@src/response/rocomMerchant')
+);
+baseGroup.use(['roco查蛋', '洛克查蛋', '洛克王国查蛋', 'roco精灵查蛋', '洛克精灵查蛋', '洛克王国精灵查蛋'], () => import('@src/response/rocomEggQuery'));
+baseGroup.use(['roco配种', '洛克配种', '洛克王国配种'], () => import('@src/response/rocomBreeding'));
 
 baseGroup.use(
   {
@@ -288,7 +270,9 @@ baseGroup.use(['wg配置'], () => import('@src/response/wegameConfig'));
 baseGroup.use(['wg模块下载'], () => import('@src/response/wegameModuleDownload'));
 baseGroup.use(['wg模块'], () => import('@src/response/wegameModules'));
 baseGroup.use(['wg更新'], () => import('@src/response/wegameUpdate'));
-baseGroup.use(['wgqq登陆', 'wgwx登陆', 'wg账号列表'], () => import('@src/response/wegameAccount'));
+baseGroup.use(['wgqq登陆', 'wgqq登录'], () => import('@src/response/wegameLoginQq'));
+baseGroup.use(['wgwx登陆', 'wgwx登录'], () => import('@src/response/wegameLoginWx'));
+baseGroup.use(['wg账号列表'], () => import('@src/response/wegameBindingList'));
 baseGroup.use(
   {
     path: 'wg切换账号',
@@ -297,7 +281,7 @@ baseGroup.use(
       args: [{ name: 'index', rules: [{ required: true }] }]
     }
   },
-  () => import('@src/response/wegameAccount')
+  () => import('@src/response/wegameSwitchBinding')
 );
 baseGroup.use(
   {
@@ -307,7 +291,7 @@ baseGroup.use(
       args: [{ name: 'index', rules: [{ required: true }] }]
     }
   },
-  () => import('@src/response/wegameAccount')
+  () => import('@src/response/wegameDeleteBinding')
 );
 
 export default router.define;

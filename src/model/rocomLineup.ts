@@ -1,4 +1,4 @@
-import { getWeGameUserContext, requestWeGame, resolveActiveWeGameCredential } from '@src/model/wegameAccount';
+import { requestWeGame, resolveActiveWeGameCredential, type WeGameContext } from '@src/model/wegameAccount';
 
 type LineupCard = {
   id: string;
@@ -102,9 +102,8 @@ function normalizeLineupCard(lineup: Record<string, unknown>): LineupCard {
   };
 }
 
-export async function getRocomLineupList(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }, rawArgs = '') {
+export async function getRocomLineupList(context: WeGameContext, rawArgs = '') {
   const args = parseLineupListArgs(rawArgs);
-  const context = getWeGameUserContext(event);
   const { credential } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
@@ -176,9 +175,8 @@ export function buildRocomLineupListText(payload: { category: string; pageNo: nu
   return lines.join('\n').trim();
 }
 
-export async function getRocomLineupDetail(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }, rawArgs = '') {
+export async function getRocomLineupDetail(context: WeGameContext, rawArgs = '') {
   const lineupId = parseLineupId(rawArgs);
-  const context = getWeGameUserContext(event);
   const { credential } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {

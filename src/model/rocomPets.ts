@@ -1,6 +1,5 @@
 import petsData from '@src/data/rocom/Pets.json';
-import { getRocomCommandPrefixes } from '@src/model/rocom';
-import { getWeGameUserContext, requestWeGame, resolveActiveWeGameCredential } from '@src/model/wegameAccount';
+import { requestWeGame, resolveActiveWeGameCredential, type WeGameContext } from '@src/model/wegameAccount';
 import { readRocomConfig } from '@src/model/wegameResource';
 
 type LocalPet = Record<string, unknown>;
@@ -122,19 +121,8 @@ function resolveZone(loginType?: string): string | undefined {
   return undefined;
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function buildPrefixPattern(): string {
-  return getRocomCommandPrefixes()
-    .map(item => escapeRegExp(item))
-    .join('|');
-}
-
 async function parsePetListArgs(text: string): Promise<{ petSubset: number; pageNo: number }> {
-  const matched = text.match(new RegExp(`^(?:${buildPrefixPattern()})\\s*精灵列表(?:\\s+(.+))?$`, 'u'));
-  const raw = normalizeText(matched?.[1]);
+  const raw = normalizeText(text);
 
   if (!raw) {
     return {
@@ -260,10 +248,9 @@ function buildPetListItem(pet: Record<string, unknown>, index: number, pageNo: n
   };
 }
 
-export async function getRocomPetList(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }) {
-  const args = await parsePetListArgs(event.current.MessageText ?? '');
+export async function getRocomPetList(context: WeGameContext, rawArgs = '') {
+  const args = await parsePetListArgs(rawArgs);
   const pageSize = await getPageSize();
-  const context = getWeGameUserContext(event);
   const { credential, binding } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {

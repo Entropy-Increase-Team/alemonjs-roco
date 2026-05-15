@@ -1,5 +1,6 @@
 import { buildRocomPetListText, getRocomPetList } from '@src/model/rocomPets';
-import { Format, useEvent, useMessage } from 'alemonjs';
+import { getWeGameUserContext } from '@src/model/wegameAccount';
+import { Format, useEvent, useMessage, useRoute } from 'alemonjs';
 import RocomPetPackageCard from '@src/img/views/RocomPetPackageCard';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
@@ -7,18 +8,22 @@ export default async () => {
   const [event] = useEvent({
     selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
   });
+  const [route] = useRoute();
   const [message] = useMessage();
   const statusFormat = Format.create();
   const statusMarkdown = Format.createMarkdown();
   const format = Format.create();
   const md = Format.createMarkdown();
 
+  const rawArgs = String(route.rawArgs ?? '').trim();
+
   try {
     statusMarkdown.addText('正在查询精灵列表，请稍后...');
     statusFormat.addMarkdown(statusMarkdown);
     void message.send({ format: statusFormat });
 
-    const result = await getRocomPetList(event);
+    const context = getWeGameUserContext(event);
+    const result = await getRocomPetList(context, rawArgs);
 
     const img = await renderComponentIsHtmlToBuffer(RocomPetPackageCard, {
       data: result

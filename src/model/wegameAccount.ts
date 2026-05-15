@@ -90,7 +90,7 @@ type WeGameStore = {
   users: Record<string, WeGameUserState>;
 };
 
-type WeGameContext = {
+export type WeGameContext = {
   userKey: string;
   userIdentifier: string;
 };

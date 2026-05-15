@@ -1,5 +1,6 @@
 import { buildRocomAccountsCardData, buildRocomAccountsText, getRocomAccounts } from '@src/model/rocomAccount';
 import RocomAccountListCard from '@src/img/views/RocomAccountListCard';
+import { getWeGameUserContext } from '@src/model/wegameAccount';
 import { Format, useEvent, useMessage } from 'alemonjs';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
@@ -18,7 +19,8 @@ export default async () => {
     statusFormat.addMarkdown(statusMarkdown);
     void message.send({ format: statusFormat });
 
-    const { accounts, bindingsTotal } = await getRocomAccounts(event);
+    const context = getWeGameUserContext(event);
+    const { accounts, bindingsTotal } = await getRocomAccounts(context);
 
     const img = await renderComponentIsHtmlToBuffer(RocomAccountListCard, {
       data: buildRocomAccountsCardData(accounts, bindingsTotal)

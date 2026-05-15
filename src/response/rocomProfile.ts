@@ -1,5 +1,6 @@
 import { buildRocomProfileCardData, buildRocomProfileText, getRocomProfile } from '@src/model/rocomQuery';
 import RocomProfileCard from '@src/img/views/RocomProfileCard';
+import { getWeGameUserContext } from '@src/model/wegameAccount';
 import { Format, useEvent, useMessage } from 'alemonjs';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
@@ -18,7 +19,8 @@ export default async () => {
     statusFormat.addMarkdown(statusMarkdown);
     void message.send({ format: statusFormat });
 
-    const profile = await getRocomProfile(event);
+    const context = getWeGameUserContext(event);
+    const profile = await getRocomProfile(context);
     const img = await renderComponentIsHtmlToBuffer(RocomProfileCard, {
       data: buildRocomProfileCardData(profile)
     });

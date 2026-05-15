@@ -1,4 +1,4 @@
-import { getWeGameBindings, getWeGameUserContext, pickActiveBinding, requestWeGame } from '@src/model/wegameAccount';
+import { getWeGameBindings, pickActiveBinding, requestWeGame, type WeGameContext } from '@src/model/wegameAccount';
 
 type RocomAccount = {
   id: string;
@@ -169,8 +169,7 @@ async function fetchRocomAccounts(userIdentifier: string): Promise<Record<string
   });
 }
 
-export async function getRocomAccounts(event: { current: { Platform?: string; BotId?: string; UserId?: string } }) {
-  const context = getWeGameUserContext(event);
+export async function getRocomAccounts(context: WeGameContext) {
   const bindings = await getWeGameBindings(context.userIdentifier);
   const bindingIndexMap = new Map(bindings.map((binding, index) => [binding.id, index + 1]));
   const data = await fetchRocomAccounts(context.userIdentifier);

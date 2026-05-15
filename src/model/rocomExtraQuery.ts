@@ -1,26 +1,9 @@
 import { getRocomAccounts } from '@src/model/rocomAccount';
 import { fetchRocomMerchantInfo } from '@src/model/rocomMerchant';
-import { getRocomCommandPrefixes } from '@src/model/rocom';
-import { getWeGameUserContext, requestWeGame, resolveActiveWeGameCredential } from '@src/model/wegameAccount';
+import { requestWeGame, resolveActiveWeGameCredential, type WeGameContext } from '@src/model/wegameAccount';
 
 function normalizeText(value: unknown): string {
   return String(value ?? '').trim();
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function buildPrefixPattern(): string {
-  return getRocomCommandPrefixes()
-    .map(item => escapeRegExp(item))
-    .join('|');
-}
-
-function extractUidByPattern(text: string, pattern: string): string {
-  const matched = text.match(new RegExp(pattern, 'u'));
-
-  return normalizeText(matched?.[1]);
 }
 
 function formatSearchValue(value: unknown): string {
@@ -117,16 +100,11 @@ async function resolveIngamePayload(payload: Record<string, unknown>): Promise<R
   throw new Error(`Ingame 任务等待超时：${taskId}`);
 }
 
-async function resolveRocomUid(
-  event: { current: { UserId?: string; Platform?: string; BotId?: string; MessageText?: string } },
-  pattern: string,
-  emptyMessage: string
-) {
-  const text = event.current.MessageText ?? '';
-  let uid = extractUidByPattern(text, pattern);
+async function resolveRocomUid(context: WeGameContext, rawArgs: string, emptyMessage: string) {
+  let uid = normalizeText(rawArgs);
 
   if (!uid) {
-    const data = await getRocomAccounts(event);
+    const data = await getRocomAccounts(context);
 
     uid = normalizeText(data.accounts.find(item => item.isPrimary)?.roleId ?? data.accounts[0]?.roleId);
   }
@@ -218,13 +196,8 @@ function normalizeBattlePets(petInfoList: unknown): Array<{ name: string; icon: 
   });
 }
 
-export async function getRocomHome(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }) {
-  const context = getWeGameUserContext(event);
-  const uid = await resolveRocomUid(
-    event,
-    `^(?:${buildPrefixPattern()})\\s*(?:家园|home|刷新家园|rehome)(?:\\s*(\\d+))?$`,
-    '未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 +账号列表 或 +家园 <UID>'
-  );
+export async function getRocomHome(context: WeGameContext, rawArgs = '') {
+  const uid = await resolveRocomUid(context, rawArgs, '未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 +账号列表 或 +家园 <UID>');
 
   const payload = await requestWeGame<Record<string, unknown>>('/api/v1/games/rocom/ingame/home/info', {
     method: 'GET',
@@ -707,17 +680,14 @@ function resolveBattleZone(loginType?: string): string | undefined {
   return undefined;
 }
 
-export async function getRocomRecord(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }) {
-  const context = getWeGameUserContext(event);
+export async function getRocomRecord(context: WeGameContext, rawArgs = '') {
   const { credential } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
     throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆 或 #wgwx登陆');
   }
 
-  const text = event.current.MessageText ?? '';
-  const matched = text.match(new RegExp(`^(?:${buildPrefixPattern()})\\s*(?:大赛战绩|战绩)(?:\\s+(\\d+))?$`, 'u'));
-  const pageNo = Number(normalizeText(matched?.[1]) || '1');
+  const pageNo = Number(normalizeText(rawArgs) || '1');
 
   if (!Number.isFinite(pageNo) || pageNo < 1) {
     throw new Error('页码必须大于等于 1');

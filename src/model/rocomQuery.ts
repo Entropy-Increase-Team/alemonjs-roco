@@ -1,6 +1,6 @@
 import { getRocomCommandPrefixes } from '@src/model/rocom';
 import { getRocomAccounts } from '@src/model/rocomAccount';
-import { getWeGameRuntimeConfig, getWeGameUserContext, requestWeGame, resolveActiveWeGameCredential } from '@src/model/wegameAccount';
+import { getWeGameRuntimeConfig, requestWeGame, resolveActiveWeGameCredential, type WeGameContext } from '@src/model/wegameAccount';
 
 type RocomSearchRow = {
   field: string;
@@ -208,8 +208,7 @@ async function resolveIngamePayload(payload: Record<string, unknown>): Promise<R
   throw new Error(`Ingame 任务等待超时：${taskId}`);
 }
 
-export async function getRocomProfile(event: { current: { Platform?: string; BotId?: string; UserId?: string } }) {
-  const context = getWeGameUserContext(event);
+export async function getRocomProfile(context: WeGameContext) {
   const { credential, binding } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
@@ -644,10 +643,8 @@ function buildSearchLines(uid: string, rows: RocomSearchRow[]): string {
   return lines.join('\n');
 }
 
-export async function searchRocomPlayer(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }) {
-  const context = getWeGameUserContext(event);
-  const text = event.current.MessageText ?? '';
-  let uid = extractUidArgument(text);
+export async function searchRocomPlayer(context: WeGameContext, rawArgs = '') {
+  let uid = extractUidArgument(rawArgs);
 
   if (!uid) {
     const data = await getRocomAccounts(event);

@@ -1,16 +1,20 @@
 import { buildRocomSearchText, searchRocomPlayer } from '@src/model/rocomQuery';
-import { Format, useEvent, useMessage } from 'alemonjs';
+import { getWeGameUserContext } from '@src/model/wegameAccount';
+import { Format, useEvent, useMessage, useRoute } from 'alemonjs';
 
 export default async () => {
   const [event] = useEvent({
     selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
   });
+  const [route] = useRoute();
   const [message] = useMessage();
   const format = Format.create();
   const md = Format.createMarkdown();
+  const rawArgs = String(route.rawArgs ?? '').trim();
 
   try {
-    const result = await searchRocomPlayer(event);
+    const context = getWeGameUserContext(event);
+    const result = await searchRocomPlayer(context, rawArgs);
 
     md.addText(buildRocomSearchText(result.uid, result.rows));
   } catch (error) {

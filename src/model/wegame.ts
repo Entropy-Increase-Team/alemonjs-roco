@@ -2,6 +2,7 @@ import { rocomModuleMeta } from '@src/data/rocom/defaults';
 import { wegameHelpDefaultConfigData } from '@src/data/wegame/defaults';
 
 const WEGAME_PREFIX = '#wg';
+const WEGAME_HELP_PREFIX = '/wg';
 
 type WeGameModuleMeta = {
   code: string;
@@ -38,6 +39,16 @@ function formatCommand(command = ''): string {
   return `${WEGAME_PREFIX}${normalizeText(command)}`;
 }
 
+function formatHelpCommand(command = ''): string {
+  const text = normalizeText(command);
+
+  if (!text) {
+    return WEGAME_HELP_PREFIX;
+  }
+
+  return text.replace(/^#wg/u, WEGAME_HELP_PREFIX);
+}
+
 function getBuiltinWeGameModules(): InstalledWeGameModule[] {
   return [
     {
@@ -72,7 +83,7 @@ function normalizeHelpGroups(input: unknown): WeGameHelpGroup[] {
               const row = entry as Record<string, unknown>;
 
               return {
-                cmd: normalizeText(row.title),
+                cmd: formatHelpCommand(normalizeText(row.title)),
                 desc: normalizeText(row.desc)
               };
             })
@@ -93,7 +104,7 @@ function getWeGameHelpGroups(): WeGameHelpGroup[] {
 
 export function buildWeGameHelpText(): string {
   const groups = getWeGameHelpGroups();
-  const lines = ['WeGame 帮助', `默认前缀：${WEGAME_PREFIX}`];
+  const lines = ['WeGame 帮助', `默认前缀：${WEGAME_HELP_PREFIX}`];
 
   for (const group of groups) {
     lines.push('');
@@ -121,9 +132,9 @@ export function getWeGameHelpCardData() {
 
   return {
     title: 'WeGame 帮助',
-    subtitle: `默认前缀：${WEGAME_PREFIX}`,
+    subtitle: `默认前缀：${WEGAME_HELP_PREFIX}`,
     prefixTitle: '默认前缀',
-    prefixText: WEGAME_PREFIX,
+    prefixText: WEGAME_HELP_PREFIX,
     footerBrand: 'WeGame-plugin',
     footerNote: 'WeGame-plugin',
     categories: groups.map(group => ({

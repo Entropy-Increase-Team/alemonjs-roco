@@ -1,6 +1,6 @@
 import ALemonJSHelpCard from '@src/img/views/Help';
 import WeGameHelpCard from '@src/img/views/WeGameHelp';
-import { buildRocoMainHelpText, buildRocoWikiHelpText, getRocoMainHelpCardData, getRocoWikiHelpCardData } from '@src/model/rocom';
+import { buildRocoMainHelpText, getRocoMainHelpCardData } from '@src/model/rocom';
 import {
   buildWeGameHelpText,
   buildWeGameInstalledModuleHintText,
@@ -33,10 +33,26 @@ export default async () => {
   if (isWeGameHelp) {
     data = getWeGameStandaloneHelpCardData();
     component = WeGameHelpCard;
-  } else if (routeKey.startsWith('roco')) {
-    data = await getRocoWikiHelpCardData();
   } else {
     data = await getRocoMainHelpCardData();
+  }
+
+  const hasHelpItems =
+    Array.isArray(data.categories) && data.categories.some((group: { items?: unknown[] }) => Array.isArray(group.items) && group.items.length > 0);
+
+  if (!hasHelpItems) {
+    const format = Format.create();
+    const md = Format.createMarkdown();
+
+    if (isWeGameHelp) {
+      md.addText(buildWeGameHelpText());
+    } else {
+      md.addText(await buildRocoMainHelpText());
+    }
+    format.addMarkdown(md);
+    void message.send({ format });
+
+    return;
   }
 
   const img = await renderComponentIsHtmlToBuffer(component, {
@@ -49,8 +65,6 @@ export default async () => {
 
     if (isWeGameHelp) {
       md.addText(buildWeGameHelpText());
-    } else if (routeKey.startsWith('roco')) {
-      md.addText(await buildRocoWikiHelpText());
     } else {
       md.addText(await buildRocoMainHelpText());
     }

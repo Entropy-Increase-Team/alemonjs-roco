@@ -28,10 +28,26 @@ function buildTextFormat(text: string) {
   return format;
 }
 
+function normalizeImageValue(image: string): string {
+  const value = String(image ?? '').trim();
+
+  if (!value) {
+    return value;
+  }
+
+  const dataUrlMatch = value.match(/^data:image\/[a-zA-Z0-9.+-]+;base64,(.+)$/u);
+
+  if (dataUrlMatch?.[1]) {
+    return `base64://${dataUrlMatch[1]}`;
+  }
+
+  return value;
+}
+
 function buildTextImageFormat(text: string, image: string) {
   const format = buildTextFormat(text);
 
-  format.addImage(image);
+  format.addImage(normalizeImageValue(image));
 
   return format;
 }
@@ -90,10 +106,7 @@ export default async () => {
       }
 
       void message.send({
-        format: buildTextImageFormat(
-          ['请使用另外一台设备的 QQ 扫描下方链接中的二维码完成 WeGame 登录。', `二维码地址：${qrImage}`, '登录成功后会自动同步到账号绑定列表。'].join('\n'),
-          qrImage
-        )
+        format: buildTextImageFormat(['请使用另外一台设备的 QQ 扫描下方二维码完成 WeGame 登录。', '登录成功后会自动同步到账号绑定列表。'].join('\n'), qrImage)
       });
 
       const credential = await waitWeGameLogin(context.userIdentifier, context.userKey, 'qq', frameworkToken, {
@@ -125,10 +138,7 @@ export default async () => {
       }
 
       void message.send({
-        format: buildTextImageFormat(
-          ['请使用另外一台设备的微信扫描下方链接中的二维码完成 WeGame 登录。', `二维码地址：${qrImage}`, '登录成功后会自动同步到账号绑定列表。'].join('\n'),
-          qrImage
-        )
+        format: buildTextImageFormat(['请使用另外一台设备的微信扫描下方二维码完成 WeGame 登录。', '登录成功后会自动同步到账号绑定列表。'].join('\n'), qrImage)
       });
 
       const credential = await waitWeGameLogin(context.userIdentifier, context.userKey, 'wechat', frameworkToken, {

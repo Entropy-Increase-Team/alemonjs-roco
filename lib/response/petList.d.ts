@@ -1,3 +1,2 @@
-import { EventsEnum } from 'alemonjs';
-declare const _default: (e: EventsEnum) => Promise<void>;
+declare const _default: () => Promise<void>;
 export default _default;

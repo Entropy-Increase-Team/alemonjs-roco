@@ -17,6 +17,6 @@ export interface HelpCardData {
     footerBrand: string;
     footerNote: string;
 }
-export default function YunzaiHelpCard({ data }: {
+export default function ALemonJSHelpCard({ data }: {
     data: HelpCardData;
 }): React.JSX.Element;

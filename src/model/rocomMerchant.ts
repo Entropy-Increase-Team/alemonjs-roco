@@ -7,6 +7,21 @@ type MerchantProduct = {
   type: string;
 };
 
+export type RocomMerchantCardData = {
+  title: string;
+  subtitle: string;
+  productCount: number;
+  roundLabel: string;
+  countdown: string;
+  products: Array<{
+    name: string;
+    image: string;
+    timeLabel: string;
+    type: string;
+    slotLabel: string;
+  }>;
+};
+
 type MerchantRound = {
   date: string;
   current: number | null;
@@ -207,4 +222,24 @@ export function buildRocomMerchantText(payload: Record<string, unknown>, now = n
   });
 
   return lines.join('\n');
+}
+
+export function buildRocomMerchantCardData(payload: Record<string, unknown>, now = new Date()): RocomMerchantCardData {
+  const { activity, products } = extractMerchantProducts(payload);
+  const roundInfo = getCurrentMerchantRound(now);
+
+  return {
+    title: normalizeText(activity.name) || '远行商人',
+    subtitle: normalizeText(activity.start_date) || '每日 08:00 / 12:00 / 16:00 / 20:00 刷新',
+    productCount: products.length,
+    roundLabel: `第 ${roundInfo.current ?? '未开放'} / ${roundInfo.total} 轮`,
+    countdown: roundInfo.countdown,
+    products: products.map((item, index) => ({
+      name: item.name,
+      image: item.image,
+      timeLabel: item.timeLabel,
+      type: item.type,
+      slotLabel: `展位 ${index + 1}`
+    }))
+  };
 }

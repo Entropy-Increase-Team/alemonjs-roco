@@ -1,4 +1,5 @@
 import { rocomModuleMeta } from '@src/data/rocom/defaults';
+import { wegameHelpDefaultConfigData } from '@src/data/wegame/defaults';
 
 const WEGAME_PREFIX = '#wg';
 
@@ -21,6 +22,14 @@ type InstalledWeGameModule = WeGameModuleMeta & {
   source: 'builtin';
 };
 
+type WeGameHelpGroup = {
+  groupTitle: string;
+  menuItems: Array<{
+    cmd: string;
+    desc: string;
+  }>;
+};
+
 function normalizeText(value: unknown): string {
   return String(value ?? '').trim();
 }
@@ -40,44 +49,100 @@ function getBuiltinWeGameModules(): InstalledWeGameModule[] {
   ];
 }
 
+function normalizeHelpGroups(input: unknown): WeGameHelpGroup[] {
+  const groups =
+    input && typeof input === 'object' && !Array.isArray(input) && Array.isArray((input as Record<string, unknown>).help_group)
+      ? ((input as Record<string, unknown>).help_group as unknown[])
+      : [];
+
+  return groups
+    .map(item => {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        return null;
+      }
+
+      const group = item as Record<string, unknown>;
+      const list = Array.isArray(group.list)
+        ? group.list
+            .map(entry => {
+              if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+                return null;
+              }
+
+              const row = entry as Record<string, unknown>;
+
+              return {
+                cmd: normalizeText(row.title),
+                desc: normalizeText(row.desc)
+              };
+            })
+            .filter((entry): entry is { cmd: string; desc: string } => Boolean(entry))
+        : [];
+
+      return {
+        groupTitle: normalizeText(group.group),
+        menuItems: list
+      };
+    })
+    .filter((group): group is WeGameHelpGroup => Boolean(group));
+}
+
+function getWeGameHelpGroups(): WeGameHelpGroup[] {
+  return normalizeHelpGroups(wegameHelpDefaultConfigData);
+}
+
+export function buildWeGameHelpText(): string {
+  const groups = getWeGameHelpGroups();
+  const lines = ['WeGame 帮助', `默认前缀：${WEGAME_PREFIX}`];
+
+  for (const group of groups) {
+    lines.push('');
+    lines.push(`${group.groupTitle}：`);
+
+    for (const item of group.menuItems) {
+      lines.push(item.desc ? `${item.cmd} - ${item.desc}` : item.cmd);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+export function buildWeGameInstalledModuleHintText(): string {
+  return [
+    '已安装游戏组件，常用核心命令：',
+    '`#wg更新` - 更新 WeGame 核心插件与全部已安装模块',
+    '`#wg更新 [模块名]` - 仅更新指定模块',
+    '更多帮助请查看 +帮助'
+  ].join('\n');
+}
+
+export function getWeGameHelpCardData() {
+  const groups = getWeGameHelpGroups();
+
+  return {
+    title: 'WeGame 帮助',
+    subtitle: `默认前缀：${WEGAME_PREFIX}`,
+    prefixTitle: '默认前缀',
+    prefixText: WEGAME_PREFIX,
+    footerBrand: 'WeGame-plugin',
+    footerNote: 'WeGame-plugin',
+    categories: groups.map(group => ({
+      title: group.groupTitle,
+      items: group.menuItems.map(item => ({
+        title: item.cmd,
+        desc: item.desc,
+        example: item.cmd
+      }))
+    }))
+  };
+}
+
 export function getInstalledWeGameModules(): Array<WeGameModuleMeta & { installed: true; enabled: true }> {
   return getBuiltinWeGameModules().map(({ source: _source, ...item }) => item);
 }
 
-export function buildWeGameHelpText(): string {
-  const installed = getInstalledWeGameModules();
-  const lines = [
-    'WeGame 帮助',
-    `默认前缀：${WEGAME_PREFIX}`,
-    '',
-    '基础指令：',
-    `- ${formatCommand('帮助')} | 查看帮助`,
-    `- ${formatCommand('qq登陆')} | 使用 QQ 扫码登录 WeGame`,
-    `- ${formatCommand('wx登陆')} | 使用微信扫码登录 WeGame`,
-    `- ${formatCommand('账号列表')} | 查看当前已绑定 WeGame 账号列表`,
-    `- ${formatCommand('切换账号 <序号>')} | 切换当前默认账号`,
-    `- ${formatCommand('删除账号 <序号>')} | 删除指定绑定账号`,
-    `- ${formatCommand('模块')} | 查看当前应用已接入模块`,
-    `- ${formatCommand('模块下载 <模块名>')} | 当前应用不提供模块仓库下载`,
-    `- ${formatCommand('更新')} | 当前应用不负责仓库或模块更新`,
-    '',
-    '游戏模块：'
-  ];
-
-  if (installed.length === 0) {
-    lines.push('- 暂无内建游戏模块');
-
-    return lines.join('\n');
-  }
-
-  for (const item of installed) {
-    const title = item.help?.title ?? item.commands.find(command => /(帮助|help)/i.test(command)) ?? `${item.name}帮助`;
-    const desc = item.help?.desc ?? `${item.name}帮助`;
-
-    lines.push(`- ${title} | ${desc}`);
-  }
-
-  return lines.join('\n');
+export function hasInstalledWeGameModules(): boolean {
+  return getBuiltinWeGameModules().length > 0;
 }
 
 export function buildWeGameCatalogText(): string {

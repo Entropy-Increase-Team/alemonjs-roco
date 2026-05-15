@@ -13,6 +13,15 @@ type ExchangePoster = {
   avatarUrl: string;
 };
 
+type ExchangeHallResult = {
+  pageNo: number;
+  totalPages: number;
+  refresh: boolean;
+  filterLabel: string;
+  commandHint: string;
+  posters: ExchangePoster[];
+};
+
 function normalizeText(value: unknown): string {
   return String(value ?? '').trim();
 }
@@ -161,11 +170,13 @@ export async function getRocomExchangeHall(event: { current: { Platform?: string
     pageNo: toNumber(payload.page_no, args.pageNo),
     totalPages: Math.max(1, toNumber(payload.total_pages, 1)),
     refresh: args.refresh,
+    filterLabel: args.refresh ? '强制刷新' : '默认筛选',
+    commandHint: '+交换大厅 <页码> [刷新]',
     posters: posters.map(item => normalizePoster(item))
-  };
+  } satisfies ExchangeHallResult;
 }
 
-export function buildRocomExchangeText(payload: { pageNo: number; totalPages: number; refresh: boolean; posters: ExchangePoster[] }): string {
+export function buildRocomExchangeText(payload: ExchangeHallResult): string {
   const lines = ['交换大厅', `页码：${payload.pageNo} / ${payload.totalPages}`, payload.refresh ? '模式：强制刷新' : '模式：普通查询', ''];
 
   payload.posters.forEach((item, index) => {

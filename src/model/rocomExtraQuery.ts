@@ -882,6 +882,98 @@ export function parseRocomSizeArgs(rawText: string): { diameter: string; weight:
   };
 }
 
+type RocomSizeMatchCard = {
+  id: string;
+  name: string;
+  icon: string;
+  typeLabel: string;
+  eggGroupsLabel: string;
+  heightLabel: string;
+  weightLabel: string;
+};
+
+export type RocomEggSizeCardData = {
+  queryLabel: string;
+  hasResults: boolean;
+  perfectMatches: RocomSizeMatchCard[];
+  rangeMatches: RocomSizeMatchCard[];
+  commandHint: string;
+  copyright: string;
+};
+
+function formatDecimalValue(value: number): string {
+  return value
+    .toFixed(2)
+    .replace(/\.00$/u, '')
+    .replace(/(\.\d)0$/u, '$1');
+}
+
+function formatMetricRange(min: unknown, max: unknown, unit: string): string {
+  const minValue = Number(min);
+  const maxValue = Number(max);
+
+  if (!Number.isFinite(minValue) || !Number.isFinite(maxValue)) {
+    return '后端未提供';
+  }
+
+  return `${formatDecimalValue(minValue)}-${formatDecimalValue(maxValue)}${unit}`;
+}
+
+function formatCountLabel(value: unknown, label: string): string {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) {
+    return '';
+  }
+
+  return `${label} ${formatDecimalValue(numeric)}`;
+}
+
+function formatProbabilityLabel(value: unknown): string {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) {
+    return '';
+  }
+
+  return `匹配概率 ${formatDecimalValue(numeric)}%`;
+}
+
+function buildSizeQueryLabel(args: { diameter: string; weight: string }, searchMode: unknown): string {
+  const labels = [`身高 ${args.diameter} cm`, `体重 ${args.weight} kg`];
+  const modeText = normalizeText(searchMode);
+
+  if (!modeText) {
+    return labels.join(' / ');
+  }
+
+  return `${labels.join(' / ')} · 模式 ${modeText}`;
+}
+
+function normalizeSizeMatchCard(item: unknown): RocomSizeMatchCard | null {
+  const row = toRecord(item);
+
+  if (!row) {
+    return null;
+  }
+
+  const petName = normalizeText(row.pet);
+  const petId = normalizeText(row.petId);
+  const probability = formatProbabilityLabel(row.probability);
+  const matchCount = formatCountLabel(row.matchCount, '命中次数');
+  const extraLabels = [probability, matchCount].filter(Boolean);
+
+  return {
+    id: petId || '-',
+    name: petName || '未知精灵',
+    icon: normalizeUrl(row.petIcon) || normalizeUrl(row.petImage),
+    typeLabel: '后端未提供',
+    eggGroupsLabel: extraLabels.length > 0 ? extraLabels.join(' / ') : '后端未提供',
+    heightLabel: formatMetricRange(row.diameterMin, row.diameterMax, 'm'),
+    weightLabel: formatMetricRange(row.weightMin, row.weightMax, 'kg')
+  };
+}
+
 export async function getRocomSizeQuery(rawText: string) {
   const args = parseRocomSizeArgs(rawText);
   const payload = await requestWeGame<Record<string, unknown>>('/api/v1/games/rocom/pet/size-query', {
@@ -898,8 +990,56 @@ export async function getRocomSizeQuery(rawText: string) {
   };
 }
 
+export function buildRocomSizeCardData(result: { args: { diameter: string; weight: string }; payload: Record<string, unknown> }): RocomEggSizeCardData {
+  const exactResults = Array.isArray(result.payload.exactResults) ? result.payload.exactResults : [];
+  const candidates = Array.isArray(result.payload.candidates) ? result.payload.candidates : [];
+  const perfectMatches = exactResults.map(normalizeSizeMatchCard).filter((item): item is RocomSizeMatchCard => Boolean(item));
+  const rangeMatches = candidates.map(normalizeSizeMatchCard).filter((item): item is RocomSizeMatchCard => Boolean(item));
+
+  return {
+    queryLabel: buildSizeQueryLabel(result.args, result.payload.searchMode),
+    hasResults: perfectMatches.length > 0 || rangeMatches.length > 0,
+    perfectMatches,
+    rangeMatches,
+    commandHint: '发送 +查蛋 <精灵名> 查看详细蛋组信息',
+    copyright: 'WeGame-plugin · RoCom'
+  };
+}
+
 export function buildRocomSizeText(result: { args: { diameter: string; weight: string }; payload: Record<string, unknown> }): string {
-  return ['精灵尺寸查询', `直径：${result.args.diameter} m`, `重量：${result.args.weight} kg`, JSON.stringify(result.payload, null, 2)].join('\n');
+  const data = buildRocomSizeCardData(result);
+  const lines = ['尺寸反查', `查询条件：${data.queryLabel}`];
+
+  if (!data.hasResults) {
+    lines.push('没有找到匹配当前尺寸的精灵');
+    lines.push('');
+    lines.push(data.commandHint);
+
+    return lines.join('\n');
+  }
+
+  if (data.perfectMatches.length > 0) {
+    lines.push('');
+    lines.push(`完美匹配（${data.perfectMatches.length}）`);
+
+    for (const [index, item] of data.perfectMatches.entries()) {
+      lines.push(`${index + 1}. ${item.name} #${item.id} · ${item.heightLabel} / ${item.weightLabel} · ${item.eggGroupsLabel}`);
+    }
+  }
+
+  if (data.rangeMatches.length > 0) {
+    lines.push('');
+    lines.push(`范围匹配（${data.rangeMatches.length}）`);
+
+    for (const [index, item] of data.rangeMatches.entries()) {
+      lines.push(`${index + 1}. ${item.name} #${item.id} · ${item.heightLabel} / ${item.weightLabel} · ${item.eggGroupsLabel}`);
+    }
+  }
+
+  lines.push('');
+  lines.push(data.commandHint);
+
+  return lines.join('\n');
 }
 
 export function getRocomMerchantInfo() {

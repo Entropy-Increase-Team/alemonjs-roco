@@ -25,6 +25,111 @@ const EGG_GROUP_META: Record<number, string> = {
   15: '机械'
 };
 
+const PRECIOUS_EGG_META: Record<number, string> = {
+  1: '金蛋',
+  2: '银蛋',
+  3: '铜蛋',
+  4: '彩蛋',
+  5: '特典蛋',
+  6: '活动蛋',
+  7: '异种蛋'
+};
+
+export type RocomEggCardData = {
+  petName: string;
+  petId: string;
+  petIcon: string;
+  typeLabel: string;
+  eggGroups: string[];
+  eggGroupsLabel: string;
+  maleRate: number | null;
+  femaleRate: number | null;
+  hatchLabel: string;
+  weightLabel: string;
+  heightLabel: string;
+  totalStats: string;
+  totalCompatible: string;
+  isUndiscovered: boolean;
+  commandHint: string;
+  copyright: string;
+  sections: Array<{
+    id: string;
+    label: string;
+    count: string;
+    members: Array<{
+      name: string;
+      meta: string;
+    }>;
+    hasMore: boolean;
+    remainCount: string;
+  }>;
+  eggDetails: null | {
+    preciousEggLabel: string;
+    baseProbText: string;
+    addProbText: string;
+    contactAddText: string;
+    variantCount: string;
+  };
+};
+
+export type RocomBreedingPairCardData = {
+  mother: {
+    name: string;
+    typeLabel: string;
+    eggGroupsLabel: string;
+  };
+  father: {
+    name: string;
+    typeLabel: string;
+    eggGroupsLabel: string;
+  };
+  compatible: boolean;
+  reasons: string[];
+  sharedEggGroupLabels: string[];
+  hatchLabel: string;
+  weightLabel: string;
+  heightLabel: string;
+  commandHint: string;
+  copyright: string;
+};
+
+export type RocomEggCandidatesCardData = {
+  keyword: string;
+  count: string;
+  candidates: Array<{
+    id: string;
+    name: string;
+    typeLabel: string;
+    eggGroupsLabel: string;
+    heightLabel: string;
+    weightLabel: string;
+  }>;
+  commandHint: string;
+  copyright: string;
+};
+
+export type RocomBreedingWantCardData = {
+  target: {
+    id: string;
+    name: string;
+    typeLabel: string;
+  };
+  eggGroupsLabel: string;
+  maleRateLabel: string;
+  femaleRateLabel: string;
+  isUndiscovered: boolean;
+  fathers: Array<{
+    id: string;
+    name: string;
+    typeLabel: string;
+    eggGroupsLabel: string;
+    heightLabel: string;
+    weightLabel: string;
+  }>;
+  commandHint: string;
+  copyright: string;
+};
+
 function normalizeText(value: unknown): string {
   return String(value ?? '').trim();
 }
@@ -39,6 +144,24 @@ function getPetName(pet: PetData): string {
   const zhName = zh && typeof zh === 'object' && !Array.isArray(zh) ? normalizeText((zh as Record<string, unknown>).name) : '';
 
   return zhName || normalizeText(pet.name) || '未知精灵';
+}
+
+function getPetIcon(pet: PetData): string {
+  const direct = normalizeText(pet.icon_url ?? pet.avatar ?? pet.image);
+
+  if (/^https?:\/\//u.test(direct)) {
+    return direct;
+  }
+
+  const id = Number(pet.id);
+
+  if (!Number.isFinite(id)) {
+    return '';
+  }
+
+  const assetId = id >= 3000 ? id : id + 3000;
+
+  return `https://game.gtimg.cn/images/rocom/rocodata/jingling/${assetId}/icon.png`;
 }
 
 function getPetType(pet: PetData): string {
@@ -67,12 +190,92 @@ function getEggGroups(pet: PetData): number[] {
   return groups.map(item => Number(item)).filter(item => Number.isFinite(item));
 }
 
+function formatPercentArray(value: unknown): string {
+  if (!Array.isArray(value) || value.length < 2) {
+    return '--';
+  }
+
+  return `${normalizeText(value[0])}/${normalizeText(value[1])}`;
+}
+
+function formatEggHatch(value: unknown): string {
+  const seconds = Number(value);
+
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return '--';
+  }
+
+  if (seconds % 3600 === 0) {
+    return `${seconds / 3600} 小时`;
+  }
+
+  if (seconds % 60 === 0) {
+    return `${seconds / 60} 分钟`;
+  }
+
+  return `${seconds} 秒`;
+}
+
+function formatRange(low: unknown, high: unknown, unit: string): string {
+  const lowNum = Number(low);
+  const highNum = Number(high);
+
+  if (!Number.isFinite(lowNum) || !Number.isFinite(highNum)) {
+    return '--';
+  }
+
+  return `${lowNum}-${highNum}${unit}`;
+}
+
+function getTotalStats(pet: PetData): string {
+  const stats = [
+    Number(pet.base_hp),
+    Number(pet.base_phy_atk),
+    Number(pet.base_mag_atk),
+    Number(pet.base_phy_def),
+    Number(pet.base_mag_def),
+    Number(pet.base_spd)
+  ];
+
+  if (stats.some(item => !Number.isFinite(item))) {
+    return '--';
+  }
+
+  return String(stats.reduce((sum, item) => sum + item, 0));
+}
+
 function formatEggGroups(groups: number[]): string {
   if (groups.length === 0) {
     return '暂无蛋组数据';
   }
 
   return groups.map(item => EGG_GROUP_META[item] || `蛋组${item}`).join(' / ');
+}
+
+function formatCandidateCard(pet: PetData) {
+  const breeding = pet.breeding && typeof pet.breeding === 'object' && !Array.isArray(pet.breeding) ? (pet.breeding as Record<string, unknown>) : {};
+
+  return {
+    id: normalizeText(pet.id) || '-',
+    name: getPetName(pet),
+    typeLabel: getPetType(pet),
+    eggGroupsLabel: formatEggGroups(getEggGroups(pet)),
+    heightLabel: formatRange(breeding.height_low, breeding.height_high, ' cm'),
+    weightLabel: formatRange(breeding.weight_low, breeding.weight_high, ' g')
+  };
+}
+
+function formatRateLabel(value: unknown): string {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) {
+    return '--';
+  }
+
+  return numeric
+    .toFixed(2)
+    .replace(/\.00$/u, '')
+    .replace(/(\.\d)0$/u, '$1');
 }
 
 function searchPet(keyword: string): SearchResult {
@@ -303,6 +506,97 @@ export async function getRocomEggQuery(rawText: string) {
   };
 }
 
+export function buildRocomEggCardData(result: { pet: PetData; compatiblePets: PetData[] }): RocomEggCardData {
+  const pet = result.pet;
+  const breeding = pet.breeding && typeof pet.breeding === 'object' && !Array.isArray(pet.breeding) ? (pet.breeding as Record<string, unknown>) : {};
+  const profile =
+    pet.breeding_profile && typeof pet.breeding_profile === 'object' && !Array.isArray(pet.breeding_profile)
+      ? (pet.breeding_profile as Record<string, unknown>)
+      : {};
+  const groups = getEggGroups(pet);
+  const isUndiscovered = groups.includes(1);
+  const variants = Array.isArray(breeding.variants) ? breeding.variants : [];
+
+  return {
+    petName: getPetName(pet),
+    petId: normalizeText(pet.id) || '-',
+    petIcon: getPetIcon(pet),
+    typeLabel: getPetType(pet),
+    eggGroups: groups.map(item => EGG_GROUP_META[item] || `蛋组${item}`),
+    eggGroupsLabel: formatEggGroups(groups),
+    maleRate: Number.isFinite(Number(profile.male_rate)) ? Number(profile.male_rate) : null,
+    femaleRate: Number.isFinite(Number(profile.female_rate)) ? Number(profile.female_rate) : null,
+    hatchLabel: formatEggHatch(breeding.hatch_data),
+    weightLabel: formatRange(breeding.weight_low, breeding.weight_high, ' g'),
+    heightLabel: formatRange(breeding.height_low, breeding.height_high, ' cm'),
+    totalStats: getTotalStats(pet),
+    totalCompatible: String(result.compatiblePets.length),
+    isUndiscovered,
+    commandHint: '#洛克查蛋 <精灵名> / +查蛋 <精灵名>',
+    copyright: 'WeGame-plugin · RoCom',
+    sections: groups
+      .filter(item => item !== 1)
+      .map(groupId => {
+        const members = result.compatiblePets.filter(item => getEggGroups(item).includes(groupId));
+
+        return {
+          id: String(groupId),
+          label: EGG_GROUP_META[groupId] || `蛋组${groupId}`,
+          count: String(members.length),
+          members: members.slice(0, 30).map(item => ({
+            name: getPetName(item),
+            meta: `${getPetType(item)} · ${formatEggGroups(getEggGroups(item))}`
+          })),
+          hasMore: members.length > 30,
+          remainCount: String(Math.max(0, members.length - 30))
+        };
+      }),
+    eggDetails: Object.keys(breeding).length
+      ? {
+          preciousEggLabel: PRECIOUS_EGG_META[Number(breeding.precious_egg_type)] || '普通蛋',
+          baseProbText: formatPercentArray(breeding.egg_base_glass_prob_array),
+          addProbText: formatPercentArray(breeding.egg_add_glass_prob_array),
+          contactAddText: breeding.is_contact_add_glass_prob ? '是' : '否',
+          variantCount: String(variants.length)
+        }
+      : null
+  };
+}
+
+export function buildRocomEggCandidatesCardData(keyword: string, candidates: PetData[]): RocomEggCandidatesCardData {
+  return {
+    keyword,
+    count: String(candidates.length),
+    candidates: candidates.slice(0, 20).map(formatCandidateCard),
+    commandHint: '发送 #洛克查蛋 <精确名称> 或 +查蛋 <精确名称> 继续查询',
+    copyright: 'WeGame-plugin · RoCom'
+  };
+}
+
+export function buildRocomBreedingWantCardData(target: PetData): RocomBreedingWantCardData {
+  const profile =
+    target.breeding_profile && typeof target.breeding_profile === 'object' && !Array.isArray(target.breeding_profile)
+      ? (target.breeding_profile as Record<string, unknown>)
+      : {};
+  const groups = getEggGroups(target);
+  const fathers = getCompatiblePets(target);
+
+  return {
+    target: {
+      id: normalizeText(target.id) || '-',
+      name: getPetName(target),
+      typeLabel: getPetType(target)
+    },
+    eggGroupsLabel: formatEggGroups(groups),
+    maleRateLabel: formatRateLabel(profile.male_rate),
+    femaleRateLabel: formatRateLabel(profile.female_rate),
+    isUndiscovered: groups.includes(1),
+    fathers: fathers.slice(0, 20).map(formatCandidateCard),
+    commandHint: '发送 #洛克配种 <父体> <母体> 或 +配种 <父体> <母体> 判断能否配种',
+    copyright: 'WeGame-plugin · RoCom'
+  };
+}
+
 export function buildRocomEggQueryText(
   result:
     | { mode: 'size'; parsed: { height: number | null; weight: number | null }; payload: Record<string, unknown> }
@@ -458,4 +752,102 @@ export function getRocomBreedingQuery(rawText: string): string {
   lines.push('', '提示：默认前父后母，孵蛋结果跟随后者。');
 
   return lines.join('\n');
+}
+
+export function getRocomBreedingResult(
+  rawText: string
+): { mode: 'want'; text: string; data: RocomBreedingWantCardData | null } | { mode: 'pair'; text: string; data: RocomBreedingPairCardData } {
+  const raw = normalizeText(rawText);
+
+  if (!raw) {
+    throw new Error('格式：#洛克配种 <精灵名> 或 +配种 <父体> <母体>');
+  }
+
+  const names = raw.split(/\s+/u).filter(Boolean);
+
+  if (names.length === 1) {
+    const result = searchPet(names[0]);
+
+    if (result.matchType === 'exact' || result.matchType === 'fuzzy') {
+      return {
+        mode: 'want',
+        text: getRocomBreedingQuery(rawText),
+        data: buildRocomBreedingWantCardData(result.pet)
+      };
+    }
+
+    return {
+      mode: 'want',
+      text: getRocomBreedingQuery(rawText),
+      data: null
+    };
+  }
+
+  const fatherName = names[0];
+  const motherName = names.slice(1).join(' ');
+  const fatherResult = searchPet(fatherName);
+
+  if (fatherResult.matchType === 'multi') {
+    return {
+      mode: 'want',
+      text: [
+        `「${fatherName}」匹配到 ${fatherResult.candidates.length} 只精灵，请精确输入：`,
+        ...fatherResult.candidates.slice(0, 10).map((item, index) => `${index + 1}. ${getPetName(item)} (#${normalizeText(item.id) || '-'})`)
+      ].join('\n'),
+      data: null
+    };
+  }
+
+  if (fatherResult.matchType === 'not_found' || !fatherResult.pet) {
+    throw new Error(`未找到名为「${fatherName}」的精灵`);
+  }
+
+  const motherResult = searchPet(motherName);
+
+  if (motherResult.matchType === 'multi') {
+    return {
+      mode: 'want',
+      text: [
+        `「${motherName}」匹配到 ${motherResult.candidates.length} 只精灵，请精确输入：`,
+        ...motherResult.candidates.slice(0, 10).map((item, index) => `${index + 1}. ${getPetName(item)} (#${normalizeText(item.id) || '-'})`)
+      ].join('\n'),
+      data: null
+    };
+  }
+
+  if (motherResult.matchType === 'not_found' || !motherResult.pet) {
+    throw new Error(`未找到名为「${motherName}」的精灵`);
+  }
+
+  const pair = evaluatePair(motherResult.pet, fatherResult.pet);
+  const text = getRocomBreedingQuery(rawText);
+  const breeding =
+    motherResult.pet.breeding && typeof motherResult.pet.breeding === 'object' && !Array.isArray(motherResult.pet.breeding)
+      ? (motherResult.pet.breeding as Record<string, unknown>)
+      : {};
+
+  return {
+    mode: 'pair',
+    text,
+    data: {
+      mother: {
+        name: getPetName(motherResult.pet),
+        typeLabel: getPetType(motherResult.pet),
+        eggGroupsLabel: formatEggGroups(getEggGroups(motherResult.pet))
+      },
+      father: {
+        name: getPetName(fatherResult.pet),
+        typeLabel: getPetType(fatherResult.pet),
+        eggGroupsLabel: formatEggGroups(getEggGroups(fatherResult.pet))
+      },
+      compatible: pair.compatible,
+      reasons: pair.reasons,
+      sharedEggGroupLabels: pair.sharedGroups.map(item => EGG_GROUP_META[item] || `蛋组${item}`),
+      hatchLabel: formatEggHatch(breeding.hatch_data),
+      weightLabel: formatRange(breeding.weight_low, breeding.weight_high, ' g'),
+      heightLabel: formatRange(breeding.height_low, breeding.height_high, ' cm'),
+      commandHint: '默认前父后母，孵蛋结果跟随后者；也可发送 #洛克配种 <精灵名> 查看目标方案',
+      copyright: 'WeGame-plugin · RoCom'
+    }
+  };
 }

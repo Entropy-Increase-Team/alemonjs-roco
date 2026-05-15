@@ -1,6 +1,9 @@
-import { buildRocomMerchantText } from '@src/model/rocomMerchant';
-import { buildRocomSizeText, getRocomMerchantInfo, getRocomSizeQuery } from '@src/model/rocomExtraQuery';
+import { buildRocomMerchantCardData, buildRocomMerchantText } from '@src/model/rocomMerchant';
+import RocomMerchantCard from '@src/img/views/RocomMerchantCard';
+import RocomEggSizeCard from '@src/img/views/RocomEggSizeCard';
+import { buildRocomSizeCardData, buildRocomSizeText, getRocomMerchantInfo, getRocomSizeQuery } from '@src/model/rocomExtraQuery';
 import { Format, useMessage, useRoute } from 'alemonjs';
+import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 export default async () => {
   const [route] = useRoute();
@@ -19,10 +22,34 @@ export default async () => {
       void message.send({ format: statusFormat });
 
       const result = await getRocomMerchantInfo();
+      const img = await renderComponentIsHtmlToBuffer(RocomMerchantCard, {
+        data: buildRocomMerchantCardData(result)
+      });
 
-      md.addText(buildRocomMerchantText(result));
+      if (typeof img === 'boolean') {
+        md.addText(buildRocomMerchantText(result));
+      } else {
+        format.addImage(img);
+        void message.send({ format });
+
+        return;
+      }
     } else {
+      statusMarkdown.addText('正在查询精灵尺寸，请稍后...');
+      statusFormat.addMarkdown(statusMarkdown);
+      void message.send({ format: statusFormat });
+
       const result = await getRocomSizeQuery(rawArgs);
+      const img = await renderComponentIsHtmlToBuffer(RocomEggSizeCard, {
+        data: buildRocomSizeCardData(result)
+      });
+
+      if (typeof img !== 'boolean') {
+        format.addImage(img);
+        void message.send({ format });
+
+        return;
+      }
 
       md.addText(buildRocomSizeText(result));
     }

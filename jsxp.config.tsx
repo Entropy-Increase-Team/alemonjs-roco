@@ -1,7 +1,7 @@
 import ActiveDate from '@src/img/views/ActiveDate';
 import AnnouncementCard from '@src/img/views/AnnouncementCard';
 import AnnouncementDetailCard from '@src/img/views/AnnouncementDetailCard';
-import RocoHelp from '@src/img/views/Help';
+import YunzaiHelpCard from '@src/img/views/Help';
 import PetDetailCard from '@src/img/views/PetDetailCard';
 import PetListCard from '@src/img/views/PetListCard';
 import { defineConfig } from 'jsxp';
@@ -10,7 +10,27 @@ import React from 'react';
 export default defineConfig({
   routes: {
     '/roco-help': {
-      component: <RocoHelp />
+      component: (
+        <YunzaiHelpCard
+          data={{
+            title: '洛克王国助手',
+            subtitle: '小洛克，欢迎来到洛克王国！',
+            prefixTitle: '指令前缀',
+            prefixText: '# / ＃ · 支持 roco / 洛克',
+            footerBrand: '洛克王国',
+            footerNote: 'Powered by alemonjs',
+            categories: [
+              {
+                title: '宠物图鉴',
+                items: [
+                  { title: '#roco图鉴 迪莫', desc: '图鉴 / 查询 / cw + 宠物名', example: '#roco图鉴 迪莫' },
+                  { title: '#roco宠物', desc: '宠物 / 精灵 / cwlb（可选属性）', example: '#roco宠物' }
+                ]
+              }
+            ]
+          }}
+        />
+      )
     },
     '/pet-detail': {
       component: (

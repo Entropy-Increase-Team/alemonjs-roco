@@ -1,7 +1,9 @@
 import { searchSkill } from '@src/data/index';
+import SkillWikiCard from '@src/img/views/SkillWikiCard';
 import { Format, useMessage, useRoute } from 'alemonjs';
+import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
-export default () => {
+export default async () => {
   const [route] = useRoute();
   const [message] = useMessage();
 
@@ -22,6 +24,29 @@ export default () => {
   if (results.length === 0) {
     md.addText(`[洛克王国] 未找到技能「${skillName}」`);
     format.addMarkdown(md);
+    void message.send({ format });
+
+    return;
+  }
+
+  const primary = results[0];
+  const img = await renderComponentIsHtmlToBuffer(SkillWikiCard, {
+    data: {
+      name: primary.skill.name,
+      attribute: `${primary.skill.element}系`,
+      category: primary.skill.type,
+      cost: String(primary.skill.cost),
+      power: String(primary.skill.power),
+      description: primary.skill.desc || '暂无描述',
+      commandHint: '#洛克技能 <技能名>',
+      updatedAt: '--',
+      resultHint: results.length > 1 ? `匹配结果：共 ${results.length} 条，当前展示第 1 条` : '匹配结果：共 1 条',
+      copyright: 'WeGame-plugin · RoCom Wiki'
+    }
+  });
+
+  if (typeof img !== 'boolean') {
+    format.addImage(img);
     void message.send({ format });
 
     return;

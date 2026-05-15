@@ -18,147 +18,195 @@ type Props = {
     pageNo: number;
     totalPages: number;
     refresh: boolean;
+    filterLabel: string;
+    commandHint: string;
     posters: Poster[];
   };
 };
 
-const width = 1080;
+const width = 1010;
+
+function renderProvideItems(items: string[]) {
+  if (items.length === 0) {
+    return <span style={{ color: 'rgba(73, 58, 44, 0.58)', fontSize: '18px', fontWeight: 700 }}>未填写</span>;
+  }
+
+  return items.map(item => (
+    <div
+      key={item}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '34px',
+        padding: '0 12px',
+        borderRadius: '10px',
+        background: '#f3e8d1',
+        color: '#5c4a39',
+        fontSize: '17px',
+        fontWeight: 800,
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75)'
+      }}
+    >
+      {item}
+    </div>
+  ));
+}
 
 function renderPoster(poster: Poster, index: number) {
   return (
     <div
       key={`${poster.userId}-${index}`}
       style={{
-        borderRadius: '28px',
-        background: poster.isExpired
-          ? 'linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))'
-          : 'linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03))',
+        width: '319px',
+        minHeight: '232px',
+        borderRadius: '14px',
+        background: poster.isExpired ? '#ddd2bc' : '#faf3e0',
+        padding: '30px 22px 16px',
+        boxSizing: 'border-box',
+        position: 'relative',
+        boxShadow: '0 8px 20px rgba(0,0,0,0.18)',
         border: '1px solid rgba(255,255,255,0.08)',
-        padding: '18px',
-        boxShadow: '0 18px 36px rgba(0,0,0,0.22)',
-        opacity: poster.isExpired ? 0.72 : 1
+        opacity: poster.isExpired ? 0.8 : 1
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '18px',
+          color: '#6b5a49',
+          fontSize: '15px',
+          fontWeight: 700
+        }}
+      >
+        {poster.timeLabel}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div
+          style={{
+            width: '58px',
+            height: '58px',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            background: '#2f2a26',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+          }}
+        >
+          {poster.avatarUrl ? (
+            <img
+              src={poster.avatarUrl}
+              alt={poster.userName}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+          ) : null}
+        </div>
+        <div style={{ minWidth: 0 }}>
           <div
             style={{
-              width: '72px',
-              height: '72px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #f7d88a, #b77444)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              color: '#2f251d',
+              fontSize: '22px',
+              fontWeight: 900,
+              lineHeight: 1.1,
+              maxWidth: '190px',
               overflow: 'hidden',
-              boxShadow: '0 10px 22px rgba(0,0,0,0.22)'
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
           >
-            {poster.avatarUrl ? (
-              <img
-                src={poster.avatarUrl}
-                alt={poster.userName}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            ) : (
-              <div style={{ fontSize: '30px', fontWeight: 900, color: '#3a2415' }}>{poster.userName.slice(0, 1)}</div>
-            )}
+            {poster.userName}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: '#f5efdf' }}>{poster.userName}</div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span
-                style={{
-                  display: 'inline-block',
-                  padding: '5px 10px',
-                  borderRadius: '999px',
-                  background: '#dfd7c0',
-                  color: '#181817',
-                  fontSize: '13px',
-                  fontWeight: 900
-                }}
-              >
-                LV{poster.userLevel}
-              </span>
-              <span
-                style={{
-                  display: 'inline-block',
-                  padding: '5px 10px',
-                  borderRadius: '999px',
-                  background: poster.isOnline ? '#91e400' : '#6b6b6b',
-                  color: poster.isOnline ? '#272727' : '#cccccc',
-                  fontSize: '13px',
-                  fontWeight: 900
-                }}
-              >
-                {poster.isOnline ? '在线' : '离线'}
-              </span>
+          <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+            <div
+              style={{
+                borderRadius: '999px',
+                background: '#dfd7c0',
+                color: '#181817',
+                padding: '4px 9px',
+                fontSize: '12px',
+                fontWeight: 900
+              }}
+            >
+              LV{poster.userLevel}
+            </div>
+            <div
+              style={{
+                borderRadius: '999px',
+                background: poster.isOnline ? '#91e400' : '#6b6b6b',
+                color: poster.isOnline ? '#272727' : '#d7d7d7',
+                padding: '4px 9px',
+                fontSize: '12px',
+                fontWeight: 900
+              }}
+            >
+              {poster.isOnline ? '在线' : '离线'}
             </div>
           </div>
         </div>
-        <div style={{ fontSize: '14px', color: 'rgba(245,239,223,0.74)' }}>{poster.timeLabel}</div>
       </div>
 
-      <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: '14px' }}>
-        <div
-          style={{
-            borderRadius: '22px',
-            background: 'rgba(0,0,0,0.18)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            padding: '16px'
-          }}
-        >
-          <div style={{ fontSize: '13px', fontWeight: 900, color: '#ffc867', marginBottom: '10px' }}>我想拥有</div>
-          <div style={{ fontSize: '18px', lineHeight: 1.45, color: '#f5efdf', fontWeight: 700 }}>{poster.wantText}</div>
+      <div style={{ marginTop: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <i
+            style={{
+              display: 'inline-block',
+              width: '4px',
+              height: '18px',
+              borderRadius: '999px',
+              background: '#f0a53a'
+            }}
+          />
+          <span style={{ color: '#4d3d2f', fontSize: '15px', fontWeight: 900 }}>我想拥有</span>
         </div>
-
         <div
           style={{
-            borderRadius: '22px',
-            background: 'rgba(0,0,0,0.18)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            padding: '16px'
+            color: '#2f251d',
+            fontSize: '18px',
+            fontWeight: 800,
+            lineHeight: 1.35,
+            minHeight: '48px',
+            paddingTop: '4px'
           }}
         >
-          <div style={{ fontSize: '13px', fontWeight: 900, color: '#ffc867', marginBottom: '10px' }}>我能提供</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {poster.provideItems.length > 0 ? (
-              poster.provideItems.map(item => (
-                <span
-                  key={item}
-                  style={{
-                    display: 'inline-block',
-                    padding: '7px 10px',
-                    borderRadius: '12px',
-                    background: 'rgba(255,200,103,0.14)',
-                    color: '#f5efdf',
-                    fontSize: '13px',
-                    fontWeight: 800
-                  }}
-                >
-                  {item}
-                </span>
-              ))
-            ) : (
-              <span style={{ color: 'rgba(245,239,223,0.56)', fontSize: '14px' }}>未填写</span>
-            )}
-          </div>
+          {poster.wantText}
+        </div>
+      </div>
+
+      <div style={{ marginTop: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <i
+            style={{
+              display: 'inline-block',
+              width: '4px',
+              height: '18px',
+              borderRadius: '999px',
+              background: '#f0a53a'
+            }}
+          />
+          <span style={{ color: '#4d3d2f', fontSize: '15px', fontWeight: 900 }}>我能提供</span>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', minHeight: '42px', alignItems: 'flex-start' }}>
+          {renderProvideItems(poster.provideItems)}
         </div>
       </div>
 
       <div
         style={{
           marginTop: '14px',
-          borderRadius: '16px',
+          width: '100%',
+          borderRadius: '8px',
           background: '#e0d5ba',
           color: '#5a4b3c',
-          padding: '10px 14px',
+          padding: '8px 12px',
+          boxSizing: 'border-box',
+          boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.45)',
           textAlign: 'center',
-          fontSize: '18px',
+          fontSize: '17px',
           fontWeight: 900
         }}
       >
@@ -170,40 +218,76 @@ function renderPoster(poster: Poster, index: number) {
 
 export default function RocomExchangeCard({ data }: Props) {
   return (
-    <HTML style={{ width: `${width}px`, background: 'linear-gradient(180deg, #1d1916 0%, #11100f 100%)' }}>
+    <HTML style={{ width: `${width}px`, background: 'transparent' }}>
       <div
         style={{
-          width: `${width}px`,
+          width: '960px',
+          padding: '25px',
           boxSizing: 'border-box',
-          padding: '28px',
           background:
-            'radial-gradient(circle at top left, rgba(255,201,102,0.16), transparent 24%), radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 18%), linear-gradient(180deg, #2a221d 0%, #151210 100%)',
-          color: '#f5efdf'
+            'linear-gradient(rgba(30, 26, 22, 0.72), rgba(30, 26, 22, 0.72)), radial-gradient(circle at top left, rgba(255, 206, 108, 0.18), transparent 22%), linear-gradient(180deg, #5a4634 0%, #2a221d 34%, #181411 100%)',
+          position: 'relative',
+          display: 'inline-block',
+          verticalAlign: 'top'
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
-            paddingBottom: '18px'
-          }}
-        >
-          <div>
-            <div style={{ fontSize: '36px', fontWeight: 900, letterSpacing: '2px', color: '#ffc966' }}>交换大厅</div>
-            <div style={{ marginTop: '8px', fontSize: '16px', color: '#e8d7b8' }}>{data.refresh ? '当前模式：强制刷新' : '当前模式：普通查询'}</div>
-          </div>
-          <div style={{ textAlign: 'right', fontSize: '15px', color: 'rgba(245,239,223,0.74)' }}>
-            <div>
-              第 {data.pageNo} / {data.totalPages} 页
+        <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingBottom: '20px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+              <span
+                style={{
+                  fontSize: '32px',
+                  fontWeight: 900,
+                  color: '#ffc966',
+                  letterSpacing: '2px'
+                }}
+              >
+                交换大厅
+              </span>
+              <span style={{ color: '#eeddbb', fontSize: '18px', marginTop: '6px' }}>当前筛选：{data.filterLabel}</span>
             </div>
-            <div style={{ marginTop: '6px' }}>交换大厅 &lt;页码&gt; [刷新]</div>
           </div>
-        </div>
 
-        <div style={{ marginTop: '22px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          {data.posters.map((poster, index) => renderPoster(poster, index))}
+          <div style={{ width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '24px 28px',
+                minHeight: '556px',
+                alignContent: 'flex-start',
+                flexDirection: 'row',
+                flexWrap: 'wrap'
+              }}
+            >
+              {data.posters.map((poster, index) => renderPoster(poster, index))}
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '14px',
+                paddingTop: '14px',
+                borderTop: '1px solid rgba(255,255,255,0.12)',
+                color: '#f2e7ce',
+                fontSize: '18px',
+                fontWeight: 800
+              }}
+            >
+              <span>
+                第 {data.pageNo} 页，共 {data.totalPages} 页
+              </span>
+              <span style={{ color: '#d6c8a7', fontSize: '16px' }}>{data.commandHint}</span>
+            </div>
+          </div>
         </div>
       </div>
     </HTML>

@@ -15,7 +15,7 @@ const baseGroup = router.group({
 });
 
 baseGroup.use(['roco帮助', 'rocohelp'], () => import('@src/response/help'));
-baseGroup.use(['洛克帮助', '洛克help'], () => import('@src/response/rocomHelp'));
+baseGroup.use(['洛克帮助', '洛克help'], () => import('@src/response/help'));
 baseGroup.use(['roco账号列表', '洛克账号列表', '洛克王国账号列表'], () => import('@src/response/rocomAccounts'));
 baseGroup.use(['roco档案', '洛克档案', '洛克王国档案'], () => import('@src/response/rocomProfile'));
 baseGroup.use(['rocouid', '洛克uid', '洛克王国uid', 'rocoUID', '洛克UID', '洛克王国UID'], () => import('@src/response/rocomSearch'));
@@ -257,7 +257,7 @@ baseGroup.use(
   () => import('@src/response/active')
 );
 baseGroup.use(['roco公告', '洛克公告', '洛克王国公告'], () => import('@src/response/announcement'));
-baseGroup.use(['wg帮助', 'wghelp'], () => import('@src/response/wegameHelp'));
+baseGroup.use(['wg帮助', 'wghelp'], () => import('@src/response/help'));
 baseGroup.use(['wg配置'], () => import('@src/response/wegameConfig'));
 baseGroup.use(['wg模块下载'], () => import('@src/response/wegameModuleDownload'));
 baseGroup.use(['wg模块'], () => import('@src/response/wegameModules'));
@@ -294,7 +294,7 @@ const rocoQuickGroup = router.group({
   }
 });
 
-rocoQuickGroup.use(['帮助', 'help'], () => import('@src/response/rocomHelp'));
+rocoQuickGroup.use(['帮助', 'help'], () => import('@src/response/help'));
 rocoQuickGroup.use(['账号列表'], () => import('@src/response/rocomAccounts'));
 rocoQuickGroup.use(['档案'], () => import('@src/response/rocomProfile'));
 rocoQuickGroup.use(['uid', 'UID'], () => import('@src/response/rocomSearch'));

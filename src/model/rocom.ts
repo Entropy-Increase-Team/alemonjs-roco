@@ -9,6 +9,17 @@ type RocomHelpGroup = {
   }>;
 };
 
+type HelpCardItem = {
+  title: string;
+  desc: string;
+  example: string;
+};
+
+type HelpCardCategory = {
+  title: string;
+  items: HelpCardItem[];
+};
+
 function normalizeText(value: unknown): string {
   return String(value ?? '').trim();
 }
@@ -17,6 +28,14 @@ export function getRocomCommandPrefixes(): string[] {
   const values = rocomModuleMeta.commandPrefixes;
 
   return values.map(item => normalizeText(item)).filter(Boolean);
+}
+
+function buildRocoMainHelpSubtitle(): string {
+  return '支持前缀：+ / #roco / #洛克 / #洛克王国';
+}
+
+function buildRocoWikiHelpSubtitle(): string {
+  return '支持前缀：#roco / #洛克 / #洛克王国';
 }
 
 function normalizeMenuGroups(groups: Array<Record<string, unknown>>): RocomHelpGroup[] {
@@ -69,9 +88,26 @@ export async function getRocomHelpGroups(): Promise<RocomHelpGroup[]> {
   }));
 }
 
+function toHelpCardCategories(groups: RocomHelpGroup[]): HelpCardCategory[] {
+  return groups.map(group => ({
+    title: group.groupTitle,
+    items: group.menuItems.map(item => ({
+      title: item.cmd,
+      desc: item.desc,
+      example: item.cmd
+    }))
+  }));
+}
+
+function findHelpGroups(groups: RocomHelpGroup[], titles: string[]): RocomHelpGroup[] {
+  const titleSet = new Set(titles);
+
+  return groups.filter(group => titleSet.has(group.groupTitle));
+}
+
 export async function buildRocomHelpText(): Promise<string> {
   const groups = await getRocomHelpGroups();
-  const lines = ['洛克帮助', '帮助入口：#洛克帮助 / #roco帮助 / +帮助'];
+  const lines = ['洛克王国世界帮助', buildRocoMainHelpSubtitle()];
 
   for (const group of groups) {
     lines.push('');
@@ -83,4 +119,90 @@ export async function buildRocomHelpText(): Promise<string> {
   }
 
   return lines.join('\n');
+}
+
+async function buildHelpTextByTitles(title: string, subtitle: string, groupTitles: string[]): Promise<string> {
+  const groups = findHelpGroups(await getRocomHelpGroups(), groupTitles);
+  const lines = [title, subtitle];
+
+  for (const group of groups) {
+    lines.push('');
+    lines.push(`${group.groupTitle}：`);
+
+    for (const item of group.menuItems) {
+      lines.push(item.desc ? `${item.cmd} - ${item.desc}` : item.cmd);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+export function buildRocoMainHelpText(): Promise<string> {
+  return buildHelpTextByTitles('洛克王国世界帮助', buildRocoMainHelpSubtitle(), ['洛克王国世界']);
+}
+
+export function buildRocoWikiHelpText(): Promise<string> {
+  return buildHelpTextByTitles('图鉴资料帮助', buildRocoWikiHelpSubtitle(), ['图鉴资料']);
+}
+
+export async function getRocomHelpCardData() {
+  const groups = await getRocomHelpGroups();
+  const subtitle = buildRocoMainHelpSubtitle();
+
+  return {
+    title: '洛克王国世界帮助',
+    subtitle,
+    prefixTitle: '支持前缀',
+    prefixText: subtitle.replace(/^支持前缀：/, ''),
+    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    categories: toHelpCardCategories(groups)
+  };
+}
+
+export async function getWeGameHelpCardData() {
+  const groups = await getRocomHelpGroups();
+  const picked = findHelpGroups(groups, ['WeGame 登录', 'WeGame 管理']);
+
+  return {
+    title: 'WeGame 帮助',
+    subtitle: '默认前缀：#wg',
+    prefixTitle: '支持前缀',
+    prefixText: '#wg',
+    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    categories: toHelpCardCategories(picked)
+  };
+}
+
+export async function getRocoWikiHelpCardData() {
+  const groups = await getRocomHelpGroups();
+  const picked = findHelpGroups(groups, ['图鉴资料']);
+  const subtitle = buildRocoWikiHelpSubtitle();
+
+  return {
+    title: '图鉴资料帮助',
+    subtitle,
+    prefixTitle: '支持前缀',
+    prefixText: subtitle.replace(/^支持前缀：/, ''),
+    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    categories: toHelpCardCategories(picked)
+  };
+}
+
+export async function getRocoMainHelpCardData() {
+  const groups = await getRocomHelpGroups();
+  const picked = findHelpGroups(groups, ['洛克王国世界']);
+  const subtitle = buildRocoMainHelpSubtitle();
+
+  return {
+    title: '洛克王国世界帮助',
+    subtitle,
+    prefixTitle: '支持前缀',
+    prefixText: subtitle.replace(/^支持前缀：/, ''),
+    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    categories: toHelpCardCategories(picked)
+  };
 }

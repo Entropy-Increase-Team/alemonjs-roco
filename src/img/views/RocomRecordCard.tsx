@@ -3,7 +3,11 @@ import HTML from './HTML.js';
 
 type BattleCard = {
   leftName: string;
+  leftAvatar: string;
+  leftPets: Array<{ name: string; icon: string }>;
   rightName: string;
+  rightAvatar: string;
+  rightPets: Array<{ name: string; icon: string }>;
   resultLabel: string;
   resultKind: 'win' | 'lose';
   time: string;
@@ -12,7 +16,15 @@ type BattleCard = {
 
 type Props = {
   data: {
-    pageNo: number;
+    userName: string;
+    userLevel: string;
+    userUid: string;
+    userAvatar: string;
+    winRate: string;
+    totalMatch: string;
+    currentPage: number;
+    pageText: string;
+    footerCommandHint: string;
     battles: BattleCard[];
   };
 };
@@ -58,25 +70,29 @@ export default function RocomRecordCard({ data }: Props) {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '18px',
-                background: 'linear-gradient(180deg, #ffd87b 0%, #ffc65f 100%)',
-                color: '#272624',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                fontWeight: 800
-              }}
-            >
-              赛
-            </div>
+            {data.userAvatar ? (
+              <img src={data.userAvatar} alt='' style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+            ) : (
+              <div
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '18px',
+                  background: 'linear-gradient(180deg, #ffd87b 0%, #ffc65f 100%)',
+                  color: '#272624',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  fontWeight: 800
+                }}
+              >
+                赛
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#f4eee1', fontSize: '22px', fontWeight: 800 }}>闪耀大赛</span>
+                <span style={{ color: '#f4eee1', fontSize: '22px', fontWeight: 800 }}>{data.userName}</span>
                 <span
                   style={{
                     backgroundColor: '#ffc966',
@@ -88,10 +104,10 @@ export default function RocomRecordCard({ data }: Props) {
                     lineHeight: 1.2
                   }}
                 >
-                  第 {data.pageNo} 页
+                  Lv. {data.userLevel}
                 </span>
               </div>
-              <span style={{ color: '#a8a69f', fontSize: '14px' }}>最近战斗记录总览</span>
+              <span style={{ color: '#a8a69f', fontSize: '14px' }}>ID:{data.userUid}</span>
             </div>
           </div>
 
@@ -112,15 +128,11 @@ export default function RocomRecordCard({ data }: Props) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <span style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                 <span style={{ color: '#a8a69f', fontSize: '14px' }}>总场次</span>
-                <span style={{ color: '#f4eee1', fontSize: '20px', fontWeight: 800 }}>{data.battles.length}</span>
+                <span style={{ color: '#f4eee1', fontSize: '20px', fontWeight: 800 }}>{data.totalMatch}</span>
               </span>
               <span style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                 <span style={{ color: '#a8a69f', fontSize: '14px' }}>胜率</span>
-                <span style={{ color: '#f4eee1', fontSize: '20px', fontWeight: 800 }}>
-                  {data.battles.length > 0
-                    ? `${Math.round((data.battles.filter(item => item.resultKind === 'win').length / data.battles.length) * 100)}%`
-                    : '0%'}
-                </span>
+                <span style={{ color: '#f4eee1', fontSize: '20px', fontWeight: 800 }}>{data.winRate}</span>
               </span>
             </div>
           </div>
@@ -142,22 +154,26 @@ export default function RocomRecordCard({ data }: Props) {
             >
               <div style={{ flex: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                  <div
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(180deg, #ffe8b0 0%, #ffc65f 100%)',
-                      color: '#5a3e1b',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: 800
-                    }}
-                  >
-                    我
-                  </div>
+                  {battle.leftAvatar ? (
+                    <img src={battle.leftAvatar} alt='' style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'contain' }} />
+                  ) : (
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(180deg, #ffe8b0 0%, #ffc65f 100%)',
+                        color: '#5a3e1b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '14px',
+                        fontWeight: 800
+                      }}
+                    >
+                      {battle.leftName.slice(0, 1)}
+                    </div>
+                  )}
                   <span
                     style={{
                       fontSize: '16px',
@@ -172,6 +188,18 @@ export default function RocomRecordCard({ data }: Props) {
                     {battle.leftName}
                   </span>
                 </div>
+                {battle.leftPets.length ? (
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {battle.leftPets.map((pet, petIndex) => (
+                      <img
+                        key={`${battle.leftName}-${pet.name}-${petIndex}`}
+                        src={pet.icon}
+                        alt={pet.name}
+                        style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'contain', backgroundColor: 'rgba(0,0,0,0.05)' }}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <div style={{ flex: 1.5, display: 'flex', justifyContent: 'center' }}>
@@ -207,23 +235,39 @@ export default function RocomRecordCard({ data }: Props) {
                   >
                     {battle.rightName}
                   </span>
-                  <div
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(180deg, #dfdfdf 0%, #bfbfbf 100%)',
-                      color: '#4a4a4a',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: 800
-                    }}
-                  >
-                    敌
-                  </div>
+                  {battle.rightAvatar ? (
+                    <img src={battle.rightAvatar} alt='' style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'contain' }} />
+                  ) : (
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(180deg, #dfdfdf 0%, #bfbfbf 100%)',
+                        color: '#4a4a4a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '14px',
+                        fontWeight: 800
+                      }}
+                    >
+                      {battle.rightName.slice(0, 1)}
+                    </div>
+                  )}
                 </div>
+                {battle.rightPets.length ? (
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    {battle.rightPets.map((pet, petIndex) => (
+                      <img
+                        key={`${battle.rightName}-${pet.name}-${petIndex}`}
+                        src={pet.icon}
+                        alt={pet.name}
+                        style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'contain', backgroundColor: 'rgba(0,0,0,0.05)' }}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
@@ -245,8 +289,8 @@ export default function RocomRecordCard({ data }: Props) {
             borderTop: '1px solid rgba(0,0,0,0.08)'
           }}
         >
-          <span style={{ fontSize: '16px', color: '#5a3e1b', fontWeight: 800 }}>第 {data.pageNo} 页战绩记录</span>
-          <span style={{ fontSize: '14px', color: '#9e8e76' }}>翻页命令：+战绩 &lt;页码&gt;</span>
+          <span style={{ fontSize: '16px', color: '#5a3e1b', fontWeight: 800 }}>{data.pageText}</span>
+          <span style={{ fontSize: '14px', color: '#9e8e76' }}>{data.footerCommandHint}</span>
         </div>
       </div>
     </HTML>

@@ -156,6 +156,24 @@ function formatDateTime(value: unknown): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function normalizeUrl(value: unknown): string {
+  const text = normalizeText(value);
+
+  if (!text) {
+    return '';
+  }
+
+  if (text.startsWith('//')) {
+    return `https:${text}`;
+  }
+
+  if (/^https?:\/\//u.test(text)) {
+    return text;
+  }
+
+  return '';
+}
+
 function getBattleResult(value: unknown): { label: string; kind: 'win' | 'lose' } {
   const numeric = Number(value);
 
@@ -170,6 +188,34 @@ function getBattleResult(value: unknown): { label: string; kind: 'win' | 'lose' 
     label: '失败',
     kind: 'lose'
   };
+}
+
+function formatWinRate(value: unknown): string {
+  const num = Number(value);
+
+  if (!Number.isFinite(num)) {
+    return '--';
+  }
+
+  return `${num
+    .toFixed(2)
+    .replace(/\.00$/u, '')
+    .replace(/(\.\d)0$/u, '$1')}%`;
+}
+
+function normalizeBattlePets(petInfoList: unknown): Array<{ name: string; icon: string }> {
+  if (!Array.isArray(petInfoList)) {
+    return [];
+  }
+
+  return petInfoList.slice(0, 6).map((item, index) => {
+    const pet = toRecord(item) ?? {};
+
+    return {
+      name: formatSearchValue(pet.pet_name ?? `精灵 ${index + 1}`),
+      icon: normalizeUrl(pet.pet_img_url)
+    };
+  });
 }
 
 export async function getRocomHome(event: { current: { Platform?: string; BotId?: string; UserId?: string; MessageText?: string } }) {
@@ -682,6 +728,20 @@ export async function getRocomRecord(event: { current: { Platform?: string; BotI
   let battles: Array<Record<string, unknown>> = [];
   let finish = false;
   const zone = resolveBattleZone(credential.loginType);
+  const [roleData, battleOverviewData] = await Promise.all([
+    requestWeGame<Record<string, unknown>>('/api/v1/games/rocom/profile/role', {
+      method: 'GET',
+      headers: {
+        'X-Framework-Token': credential.frameworkToken
+      }
+    }).catch(() => ({})),
+    requestWeGame<Record<string, unknown>>('/api/v1/games/rocom/profile/battle-overview', {
+      method: 'GET',
+      headers: {
+        'X-Framework-Token': credential.frameworkToken
+      }
+    }).catch(() => ({}))
+  ]);
 
   while (currentPage <= pageNo) {
     const params: Record<string, string> = {
@@ -721,6 +781,10 @@ export async function getRocomRecord(event: { current: { Platform?: string; BotI
 
   return {
     pageNo,
+    currentPage,
+    finish,
+    role: toRecord(toRecord(roleData)?.role) ?? credential.role ?? {},
+    battleOverview: battleOverviewData,
     battles
   };
 }
@@ -745,18 +809,44 @@ export function buildRocomRecordText(payload: { pageNo: number; battles: Array<R
 }
 
 export function buildRocomRecordCardData(payload: { pageNo: number; battles: Array<Record<string, unknown>> }): {
-  pageNo: number;
+  userName: string;
+  userLevel: string;
+  userUid: string;
+  userAvatar: string;
+  winRate: string;
+  totalMatch: string;
+  currentPage: number;
+  pageText: string;
+  footerCommandHint: string;
   battles: Array<{
     leftName: string;
+    leftAvatar: string;
+    leftPets: Array<{ name: string; icon: string }>;
     rightName: string;
+    rightAvatar: string;
+    rightPets: Array<{ name: string; icon: string }>;
     resultLabel: string;
     resultKind: 'win' | 'lose';
     time: string;
     date: string;
   }>;
 } {
+  const role = ('role' in payload ? (payload.role as Record<string, unknown>) : {}) ?? {};
+  const battleOverview = ('battleOverview' in payload ? (payload.battleOverview as Record<string, unknown>) : {}) ?? {};
+
   return {
-    pageNo: payload.pageNo,
+    userName: formatSearchValue(role.name ?? payload.battles[0]?.nickname ?? '洛克玩家'),
+    userLevel: formatSearchValue(role.level),
+    userUid: formatSearchValue(role.id ?? role.openid),
+    userAvatar: normalizeUrl(role.avatar_url ?? role.avatar ?? payload.battles[0]?.avatar_url),
+    winRate: formatWinRate(battleOverview.win_rate),
+    totalMatch: formatSearchValue(battleOverview.total_match ?? payload.battles.length),
+    currentPage: 'currentPage' in payload ? Number(payload.currentPage) || payload.pageNo : payload.pageNo,
+    pageText:
+      'finish' in payload && payload.finish
+        ? `第 ${'currentPage' in payload ? Number(payload.currentPage) || payload.pageNo : payload.pageNo} 页 / 共 ${'currentPage' in payload ? Number(payload.currentPage) || payload.pageNo : payload.pageNo} 页`
+        : `第 ${'currentPage' in payload ? Number(payload.currentPage) || payload.pageNo : payload.pageNo} 页 / 可继续翻页`,
+    footerCommandHint: '用 “+战绩 <页数>” 进行翻页',
     battles: payload.battles.map(battle => {
       const result = getBattleResult(battle.result);
       const formatted = formatDateTime(battle.battle_time);
@@ -764,7 +854,11 @@ export function buildRocomRecordCardData(payload: { pageNo: number; battles: Arr
 
       return {
         leftName: formatSearchValue(battle.nickname),
+        leftAvatar: normalizeUrl(battle.avatar_url),
+        leftPets: normalizeBattlePets(battle.pet_base_info),
         rightName: formatSearchValue(battle.enemy_nickname),
+        rightAvatar: normalizeUrl(battle.enemy_avatar_url),
+        rightPets: normalizeBattlePets(battle.enemy_pet_base_info),
         resultLabel: result.label,
         resultKind: result.kind,
         time,

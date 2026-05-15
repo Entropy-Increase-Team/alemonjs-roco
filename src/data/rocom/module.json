@@ -33,6 +33,6 @@
     "desc": "查看洛克帮助；也可使用 +帮助"
   },
   "config": {
-    "storeKey": "data:alemonjs-roko:config:rocom.yaml"
+    "storeKey": "data:alemonjs-roco:config:rocom.yaml"
   }
 }

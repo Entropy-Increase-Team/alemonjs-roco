@@ -1,5 +1,4 @@
-import { isHttpOk, requestJson } from '@src/model/http';
-import { getWeGameBindings, getWeGameUserContext, pickActiveBinding } from '@src/model/wegameAccount';
+import { getWeGameBindings, getWeGameUserContext, pickActiveBinding, requestWeGame } from '@src/model/wegameAccount';
 
 type RocomAccount = {
   id: string;
@@ -20,10 +19,6 @@ type RocomAccount = {
 
 function normalizeText(value: unknown): string {
   return String(value ?? '').trim();
-}
-
-function createRequestError(message: string): Error {
-  return new Error(message);
 }
 
 function normalizeRocomAccount(payload: unknown): RocomAccount | null {
@@ -98,36 +93,15 @@ function formatDateTime(value: unknown): string {
 }
 
 async function fetchRocomAccounts(userIdentifier: string): Promise<Record<string, unknown>> {
-  const url = new URL('/api/v1/games/rocom/accounts', process.env.WEGAME_BASE_URL ?? 'https://wegame.shallow.ink');
-
-  url.searchParams.set('user_identifier', userIdentifier);
-  url.searchParams.set('device_fingerprint', 'alemonjs-roco');
-
-  const headers: Record<string, string> = {};
-
-  if (process.env.WEGAME_API_KEY) {
-    headers['X-API-Key'] = process.env.WEGAME_API_KEY;
-  }
-  headers['X-User-Identifier'] = userIdentifier;
-
-  const response = await requestJson<{ code?: number; message?: string; data?: Record<string, unknown> }>({
-    url: String(url),
+  return await requestWeGame<Record<string, unknown>>('/api/v1/games/rocom/accounts', {
     method: 'GET',
-    headers,
-    timeout: 15000
+    headers: {
+      'X-User-Identifier': userIdentifier
+    },
+    params: {
+      user_identifier: userIdentifier
+    }
   });
-
-  const body = response.data ?? null;
-
-  if (!isHttpOk(response.status)) {
-    throw createRequestError(body?.message ?? `请求失败：HTTP ${response.status}`);
-  }
-
-  if (!body || Number(body.code) !== 0) {
-    throw createRequestError(body?.message ?? '洛克账号列表请求失败');
-  }
-
-  return body.data ?? {};
 }
 
 export async function getRocomAccounts(event: { current: { Platform?: string; BotId?: string; UserId?: string } }) {

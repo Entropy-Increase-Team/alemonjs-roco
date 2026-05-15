@@ -37,7 +37,7 @@ const HELP_DATA: HelpCategory[] = [
     title: '快捷指令',
     items: [
       { name: '帮助', desc: '支持 #洛克帮助 / #roco帮助 / +帮助', eg: '#洛克帮助' },
-      { name: '前缀', desc: '显式命令用 # / ＃ / /，快捷入口用 +', eg: '#洛克图鉴 / +帮助' }
+      { name: '前缀', desc: '显式命令用 # / ＃ / /，快捷入口用 +', eg: '#洛克帮助 / +帮助' }
     ]
   }
 ];

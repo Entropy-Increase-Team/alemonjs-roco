@@ -80,14 +80,14 @@ async function readWeGameConfig(): Promise<WeGameConfig> {
   const wegame = (merged.wegame as Record<string, unknown> | undefined) ?? {};
 
   return {
-    base_url: normalizeText(process.env.WEGAME_BASE_URL ?? wegame.base_url),
-    api_key: normalizeText(process.env.WEGAME_API_KEY ?? wegame.api_key),
-    client_type: normalizeText(process.env.WEGAME_CLIENT_TYPE ?? wegame.client_type ?? 'bot'),
-    client_id: normalizeText(process.env.WEGAME_CLIENT_ID ?? wegame.client_id),
-    device_fingerprint: normalizeText(process.env.WEGAME_DEVICE_FINGERPRINT ?? wegame.device_fingerprint),
-    request_timeout_ms: Number(process.env.WEGAME_REQUEST_TIMEOUT_MS ?? wegame.request_timeout_ms ?? 15000),
-    login_poll_interval_ms: Number(process.env.WEGAME_LOGIN_POLL_INTERVAL_MS ?? wegame.login_poll_interval_ms ?? 2000),
-    login_timeout_ms: Number(process.env.WEGAME_LOGIN_TIMEOUT_MS ?? wegame.login_timeout_ms ?? 180000)
+    base_url: normalizeText(wegame.base_url),
+    api_key: normalizeText(wegame.api_key),
+    client_type: normalizeText(wegame.client_type ?? 'bot'),
+    client_id: normalizeText(wegame.client_id),
+    device_fingerprint: normalizeText(wegame.device_fingerprint),
+    request_timeout_ms: Number(wegame.request_timeout_ms ?? 15000),
+    login_poll_interval_ms: Number(wegame.login_poll_interval_ms ?? 2000),
+    login_timeout_ms: Number(wegame.login_timeout_ms ?? 180000)
   };
 }
 
@@ -377,7 +377,7 @@ export async function createWeGameLogin(userIdentifier: string, platform: 'qq' |
   const config = await readWeGameConfig();
 
   if (!config.api_key) {
-    throw new Error('请先写入 WeGame 运行配置 wegame.api_key，或设置环境变量 WEGAME_API_KEY');
+    throw new Error('请先在 alemon.config.yaml 的 alemonjs-roco.wegame.api_key 中写入 WeGame API Key');
   }
 
   const pathName = platform === 'wechat' ? '/api/v1/login/wegame/wechat/qr' : '/api/v1/login/wegame/qr';
@@ -451,7 +451,7 @@ export async function getWeGameBindings(userIdentifier: string): Promise<WeGameB
   const config = await readWeGameConfig();
 
   if (!config.api_key) {
-    throw new Error('缺少 WeGame API Key');
+    throw new Error('缺少 WeGame API Key，请检查 alemon.config.yaml -> alemonjs-roco.wegame.api_key');
   }
 
   const payload = await request<{ bindings?: unknown[] }>('/api/v1/user/bindings', {

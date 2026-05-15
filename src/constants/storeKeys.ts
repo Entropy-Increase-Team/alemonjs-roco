@@ -1,4 +1,4 @@
-const appName = 'alemonjs-roko';
+const appName = 'alemonjs-roco';
 const dataPrefix = `data:${appName}`;
 
 export type StoreKeyFormat = 'json' | 'yaml';

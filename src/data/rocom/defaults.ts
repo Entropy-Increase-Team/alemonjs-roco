@@ -1,4 +1,3 @@
-import { commandKeyConfig } from '@src/constants/commandKeys';
 import rocomDefaultConfig from './config_default.yaml';
 import rocomHelpDefaultConfig from './rocom_help_default.yaml';
 import { storeKeys } from '@src/constants/storeKeys';
@@ -62,7 +61,7 @@ export const rocomModuleMeta = {
   description: '洛克业务模块，提供档案、家园、战绩、阵容、交换大厅、查蛋与远行商人订阅能力。',
   version: '0.2.1',
   apiDoc: 'modules/rocom/Rocom-API.md',
-  commandPrefixes: [...commandKeyConfig.rocomPrefixes] as string[],
+  commandPrefixes: ['+', '#roco', '＃roco', '/roco', '#洛克', '＃洛克', '/洛克', '#洛克王国', '＃洛克王国', '/洛克王国'] as string[],
   commands: [
     '#洛克帮助',
     '#洛克账号列表',

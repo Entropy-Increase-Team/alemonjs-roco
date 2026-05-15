@@ -71,7 +71,7 @@ export async function getRocomHelpGroups(): Promise<RocomHelpGroup[]> {
 
 export async function buildRocomHelpText(): Promise<string> {
   const groups = await getRocomHelpGroups();
-  const lines = ['洛克帮助', `支持前缀：${getRocomCommandPrefixes().join(' / ')}`];
+  const lines = ['洛克帮助', '帮助入口：#洛克帮助 / #roco帮助 / +帮助'];
 
   for (const group of groups) {
     lines.push('');

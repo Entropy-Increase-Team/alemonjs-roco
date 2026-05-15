@@ -1,3 +1,4 @@
+import { type WeGameContext } from '@src/model/wegameAccount';
 type PetListItem = {
     name: string;
     level: string;
@@ -5,14 +6,7 @@ type PetListItem = {
     rarity: string;
     imageUrl: string;
 };
-export declare function getRocomPetList(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-        MessageText?: string;
-    };
-}): Promise<{
+export declare function getRocomPetList(context: WeGameContext, rawArgs?: string): Promise<{
     currentTab: string;
     userName: string;
     userLevel: string;

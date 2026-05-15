@@ -1,11 +1,5 @@
-export declare function getRocomHome(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-        MessageText?: string;
-    };
-}): Promise<{
+import { type WeGameContext } from '@src/model/wegameAccount';
+export declare function getRocomHome(context: WeGameContext, rawArgs?: string): Promise<{
     rawPayload: Record<string, unknown>;
     uid: string;
     homeName: string;
@@ -64,14 +58,7 @@ export type RocomHomeCardData = {
     guardEmptyText: string;
 };
 export declare function buildRocomHomeCardData(payload: Record<string, unknown>, uid: string): RocomHomeCardData;
-export declare function getRocomRecord(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-        MessageText?: string;
-    };
-}): Promise<{
+export declare function getRocomRecord(context: WeGameContext, rawArgs?: string): Promise<{
     pageNo: number;
     currentPage: number;
     finish: boolean;

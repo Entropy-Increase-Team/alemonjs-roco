@@ -1,3 +1,4 @@
+import { type WeGameContext } from '@src/model/wegameAccount';
 type RocomAccount = {
     id: string;
     bindingId: string;
@@ -40,13 +41,7 @@ export type RocomAccountsCardData = {
     tip: string;
     copyright: string;
 };
-export declare function getRocomAccounts(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-    };
-}): Promise<{
+export declare function getRocomAccounts(context: WeGameContext): Promise<{
     accounts: RocomAccount[];
     bindingsTotal: number;
     activeBinding: import("@src/model/wegameAccount").WeGameBinding | null;

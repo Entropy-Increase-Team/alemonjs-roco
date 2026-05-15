@@ -1,3 +1,4 @@
+import { type WeGameContext } from '@src/model/wegameAccount';
 type LineupCard = {
     id: string;
     name: string;
@@ -9,14 +10,7 @@ type LineupCard = {
     authorName: string;
     likes: number;
 };
-export declare function getRocomLineupList(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-        MessageText?: string;
-    };
-}, rawArgs?: string): Promise<{
+export declare function getRocomLineupList(context: WeGameContext, rawArgs?: string): Promise<{
     category: string;
     pageNo: number;
     totalPages: number;
@@ -28,13 +22,6 @@ export declare function buildRocomLineupListText(payload: {
     totalPages: number;
     lineups: LineupCard[];
 }): string;
-export declare function getRocomLineupDetail(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-        MessageText?: string;
-    };
-}, rawArgs?: string): Promise<LineupCard>;
+export declare function getRocomLineupDetail(context: WeGameContext, rawArgs?: string): Promise<LineupCard>;
 export declare function buildRocomLineupDetailText(payload: LineupCard): string;
 export {};

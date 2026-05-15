@@ -1,3 +1,4 @@
+import { type WeGameContext } from '@src/model/wegameAccount';
 type ExchangePoster = {
     userName: string;
     userLevel: number;
@@ -17,14 +18,7 @@ type ExchangeHallResult = {
     commandHint: string;
     posters: ExchangePoster[];
 };
-export declare function getRocomExchangeHall(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-        MessageText?: string;
-    };
-}): Promise<{
+export declare function getRocomExchangeHall(context: WeGameContext, rawArgs?: string): Promise<{
     pageNo: number;
     totalPages: number;
     refresh: boolean;

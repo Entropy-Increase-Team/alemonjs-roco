@@ -1,3 +1,4 @@
+import { type WeGameContext } from '@src/model/wegameAccount';
 type RocomSearchRow = {
     field: string;
     label: string;
@@ -61,13 +62,7 @@ export type RocomProfileCardData = {
         anchor: string;
     }>;
 };
-export declare function getRocomProfile(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-    };
-}): Promise<{
+export declare function getRocomProfile(context: WeGameContext): Promise<{
     role: Record<string, unknown> | {
         id?: string;
         openid?: string;
@@ -100,14 +95,7 @@ export declare function buildRocomProfileCardData(payload: {
     battleOverview: Record<string, unknown>;
     battleList?: Record<string, unknown>;
 }): RocomProfileCardData;
-export declare function searchRocomPlayer(event: {
-    current: {
-        Platform?: string;
-        BotId?: string;
-        UserId?: string;
-        MessageText?: string;
-    };
-}): Promise<{
+export declare function searchRocomPlayer(context: WeGameContext, rawArgs?: string): Promise<{
     uid: string;
     rows: RocomSearchRow[];
 }>;

@@ -68,7 +68,7 @@ export type WeGameBindingListCardData = {
     tip: string;
     copyright: string;
 };
-type WeGameContext = {
+export type WeGameContext = {
     userKey: string;
     userIdentifier: string;
 };

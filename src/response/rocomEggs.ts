@@ -10,7 +10,7 @@ export default async () => {
   const rawArgs = String(route.rawArgs ?? '').trim();
 
   try {
-    if (routeKey === '查蛋' || routeKey === '精灵查蛋') {
+    if (routeKey.endsWith('查蛋') || routeKey.endsWith('精灵查蛋')) {
       const result = await getRocomEggQuery(rawArgs);
 
       md.addText(buildRocomEggQueryText(result));

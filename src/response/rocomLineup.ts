@@ -15,7 +15,7 @@ export default async () => {
   const rawArgs = String(route.rawArgs ?? '').trim();
 
   try {
-    if (routeKey === '查看阵容' || routeKey === '阵容详情') {
+    if (routeKey.endsWith('查看阵容') || routeKey.endsWith('阵容详情')) {
       const result = await getRocomLineupDetail(event, rawArgs);
 
       const img = await renderComponentIsHtmlToBuffer(RocomLineupCard, {

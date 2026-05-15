@@ -124,7 +124,7 @@ async function fetchRocomAccounts(userIdentifier: string): Promise<Record<string
   }
 
   if (!body || Number(body.code) !== 0) {
-    throw createRequestError(body?.message ?? 'RoCom 账号列表请求失败');
+    throw createRequestError(body?.message ?? '洛克账号列表请求失败');
   }
 
   return body.data ?? {};
@@ -160,12 +160,12 @@ export async function getRocomAccounts(event: { current: { Platform?: string; Bo
 export function buildRocomAccountsText(accounts: RocomAccount[], bindingsTotal: number): string {
   if (accounts.length === 0) {
     return [
-      '洛克王国世界账号列表',
+      '洛克账号列表',
       bindingsTotal > 0 ? `当前已绑定 ${bindingsTotal} 个 WeGame 账号，但还没有识别到可用洛克角色` : '当前还没有已绑定的 WeGame 账号'
     ].join('\n');
   }
 
-  const lines = ['洛克王国世界账号列表', `当前共识别到 ${accounts.length} 个可用洛克角色`, ''];
+  const lines = ['洛克账号列表', `当前共识别到 ${accounts.length} 个可用洛克角色`, ''];
 
   for (const account of accounts) {
     const tags: string[] = [];

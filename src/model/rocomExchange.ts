@@ -1,4 +1,5 @@
 import { getWeGameUserContext, requestWeGame, resolveActiveWeGameCredential } from '@src/model/wegameAccount';
+import { getRocomCommandPrefixes } from '@src/model/rocom';
 
 type ExchangePoster = {
   userName: string;
@@ -36,6 +37,16 @@ function resolveAccountType(loginType?: string): string | undefined {
   return undefined;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildPrefixPattern(): string {
+  return getRocomCommandPrefixes()
+    .map(item => escapeRegExp(item))
+    .join('|');
+}
+
 function formatPosterTime(value: unknown): string {
   const numeric = Number(value);
 
@@ -55,7 +66,7 @@ function formatPosterTime(value: unknown): string {
 }
 
 function parseExchangeArgs(text: string): { pageNo: number; refresh: boolean } {
-  const matched = text.match(/^(?:\+|#洛克王国世界|#洛克世界|#洛克)\s*(?:交换大厅|大厅)(?:\s+(.+))?$/u);
+  const matched = text.match(new RegExp(`^(?:${buildPrefixPattern()})\\s*(?:交换大厅|大厅)(?:\\s+(.+))?$`, 'u'));
   const raw = normalizeText(matched?.[1]);
 
   if (!raw) {
@@ -120,7 +131,7 @@ export async function getRocomExchangeHall(event: { current: { Platform?: string
   const { credential } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
-    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆、#wgwx登陆 或 +qq登陆、+wx登陆');
+    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆 或 #wgwx登陆');
   }
 
   const params: Record<string, string> = {

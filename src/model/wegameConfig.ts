@@ -83,7 +83,7 @@ async function getRocomConfig(): Promise<ConfigSection> {
 
   return {
     code: 'rocom',
-    title: 'rocom 模块',
+    title: '洛克模块',
     source: getRocomConfigSource(),
     fields: [
       { field: 'rocom.page_size', label: '精灵列表每页数量', help: '精灵列表分页大小' },
@@ -142,7 +142,7 @@ export function getWeGameConfigRegistry(): ConfigSection[] {
     },
     {
       code: 'rocom',
-      title: 'rocom 模块',
+      title: '洛克模块',
       source: getRocomConfigSource(),
       fields: [
         { field: 'rocom.page_size', label: '精灵列表每页数量', help: '精灵列表分页大小' },

@@ -18,26 +18,26 @@ const HELP_DATA: HelpCategory[] = [
   {
     title: '宠物图鉴',
     items: [
-      { name: '查看宠物', desc: '图鉴 / 查询 / cw + 宠物名', eg: '#roco图鉴 迪莫' },
-      { name: '宠物列表', desc: '宠物 / 精灵 / cwlb（可选属性）', eg: '#roco宠物' },
-      { name: '属性筛选', desc: '按属性筛选宠物列表', eg: '#roco宠物 火' },
-      { name: '技能搜索', desc: '技能 / jn + 技能名', eg: '#roco技能 闪光冲击' }
+      { name: '查看宠物', desc: '洛克图鉴 / 洛克查询 / 洛克cw + 宠物名', eg: '#洛克图鉴 迪莫' },
+      { name: '宠物列表', desc: '洛克宠物 / 洛克精灵 / 洛克cwlb', eg: '#洛克宠物' },
+      { name: '属性筛选', desc: '按属性筛选宠物列表', eg: '#洛克宠物 火' },
+      { name: '技能搜索', desc: '洛克技能 / 洛克jn + 技能名', eg: '#洛克技能 闪光冲击' }
     ]
   },
   {
     title: '资讯功能',
     items: [
-      { name: '活动日历', desc: '活动 / 日历 / hdrl', eg: '#roco活动' },
-      { name: '公告列表', desc: '查看最新公告，可切换分类', eg: '#roco公告' },
-      { name: '公告分类', desc: '公告 / 资讯 / 活动', eg: '#roco公告 资讯' },
-      { name: '公告详情', desc: '公告 + 序号查看详情', eg: '#roco公告 3' }
+      { name: '活动日历', desc: '洛克活动 / 洛克日历 / 洛克hdrl', eg: '#洛克活动' },
+      { name: '公告列表', desc: '查看最新公告，可切换分类', eg: '#洛克公告' },
+      { name: '公告分类', desc: '公告 / 资讯 / 活动', eg: '#洛克公告 资讯' },
+      { name: '公告详情', desc: '公告 + 序号查看详情', eg: '#洛克公告 3' }
     ]
   },
   {
     title: '快捷指令',
     items: [
-      { name: '帮助', desc: '帮助 / help', eg: '#roco帮助' },
-      { name: '前缀', desc: '支持多种前缀', eg: '#roco / #洛克' }
+      { name: '帮助', desc: '支持 #洛克帮助 / #roco帮助 / +帮助', eg: '#洛克帮助' },
+      { name: '前缀', desc: '显式命令用 # / ＃ / /，快捷入口用 +', eg: '#洛克图鉴 / +帮助' }
     ]
   }
 ];
@@ -111,7 +111,7 @@ export default function RocoHelp() {
               <div className='w-10 h-10 bg-white rounded-lg flex items-center justify-center text-xl font-black text-help-dark shrink-0'>#</div>
               <div>
                 <div className='text-sm text-white/80 font-bold'>指令前缀</div>
-                <div className='text-xs text-white/45 mt-0.5'># ! / ！＃ · 支持 roco / 洛克</div>
+                <div className='text-xs text-white/45 mt-0.5'># / ＃ / 用于显式命令，+ 用于洛克快捷入口</div>
               </div>
             </div>
 

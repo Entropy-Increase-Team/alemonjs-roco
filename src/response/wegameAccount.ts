@@ -44,7 +44,7 @@ export default async () => {
   const context = getWeGameUserContext(event);
 
   try {
-    if (routeKey === 'qq登陆') {
+    if (routeKey === 'wgqq登陆') {
       const qrData = await createWeGameLogin(context.userIdentifier, 'qq');
       const frameworkToken = qrData.frameworkToken?.trim();
       const qrImage = qrData.qr_image?.trim();
@@ -80,7 +80,7 @@ export default async () => {
       return;
     }
 
-    if (routeKey === 'wx登陆') {
+    if (routeKey === 'wgwx登陆') {
       const qrData = await createWeGameLogin(context.userIdentifier, 'wechat');
       const frameworkToken = qrData.frameworkToken?.trim();
       const qrImage = qrData.qr_image?.trim();
@@ -116,7 +116,7 @@ export default async () => {
       return;
     }
 
-    if (routeKey === '账号列表' || routeKey === 'wg账号列表') {
+    if (routeKey === 'wg账号列表') {
       const bindings = await getWeGameBindings(context.userIdentifier);
       const saved = await getSavedCredential(context.userKey);
 
@@ -139,14 +139,14 @@ export default async () => {
       return;
     }
 
-    if (routeKey === '切换账号' || routeKey === 'wg切换账号') {
+    if (routeKey === 'wg切换账号') {
       const bindings = await getWeGameBindings(context.userIdentifier);
 
       if (bindings.length === 0) {
         throw new Error('当前还没有已绑定的 WeGame 账号');
       }
 
-      const index = extractAccountIndex(String(route.param('index') ?? ''), routeKey === '切换账号' ? '#wg切换账号 <序号>' : '+wg切换账号 <序号>');
+      const index = extractAccountIndex(String(route.param('index') ?? ''), '#wg切换账号 <序号>');
       const target = bindings[index - 1];
 
       if (!target) {
@@ -176,14 +176,14 @@ export default async () => {
       return;
     }
 
-    if (routeKey === '删除账号' || routeKey === 'wg删除账号') {
+    if (routeKey === 'wg删除账号') {
       const bindings = await getWeGameBindings(context.userIdentifier);
 
       if (bindings.length === 0) {
         throw new Error('当前还没有已绑定的 WeGame 账号');
       }
 
-      const index = extractAccountIndex(String(route.param('index') ?? ''), routeKey === '删除账号' ? '#wg删除账号 <序号>' : '+wg删除账号 <序号>');
+      const index = extractAccountIndex(String(route.param('index') ?? ''), '#wg删除账号 <序号>');
       const target = bindings[index - 1];
 
       if (!target) {

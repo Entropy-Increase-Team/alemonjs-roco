@@ -277,7 +277,7 @@ export async function getRocomEggQuery(rawText: string) {
   }
 
   if (!parsed.name) {
-    throw new Error('格式：+查蛋 <精灵名> 或 +查蛋 <身高cm> <体重kg>');
+    throw new Error('格式：#洛克查蛋 <精灵名> 或 +查蛋 <身高cm> <体重kg>');
   }
 
   const result = searchPet(parsed.name);
@@ -376,7 +376,7 @@ export function getRocomBreedingQuery(rawText: string): string {
   const raw = normalizeText(rawText);
 
   if (!raw) {
-    throw new Error('格式：+配种 <精灵名> 或 +配种 <父体> <母体>');
+    throw new Error('格式：#洛克配种 <精灵名> 或 +配种 <父体> <母体>');
   }
 
   const names = raw.split(/\s+/u).filter(Boolean);

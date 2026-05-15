@@ -102,7 +102,7 @@ export default function AnnouncementCard({ data }: Props) {
               ▶
             </span>
           </div>
-          <span className='text-ann-date text-[12px]'>发送 #roco公告 序号 查看详情</span>
+          <span className='text-ann-date text-[12px]'>发送 #洛克公告 序号 查看详情</span>
         </div>
       </div>
     </HTML>

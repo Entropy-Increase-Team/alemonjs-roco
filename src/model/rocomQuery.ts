@@ -162,7 +162,7 @@ export async function getRocomProfile(event: { current: { Platform?: string; Bot
   const { credential, binding } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
-    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆、#wgwx登陆 或 +qq登陆、+wx登陆');
+    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆 或 #wgwx登陆');
   }
 
   const accountType = formatLoginTypeToAccountType(binding?.loginType ?? credential.loginType);
@@ -280,7 +280,7 @@ export async function searchRocomPlayer(event: { current: { Platform?: string; B
   }
 
   if (!uid) {
-    throw new Error('未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 +账号列表 或 +uid <UID>');
+    throw new Error('未提供 UID，且当前没有可用的已绑定洛克角色。请先发送 #洛克账号列表 或 +uid <UID>');
   }
 
   const params = await buildRuntimeScopedParams(context.userIdentifier);

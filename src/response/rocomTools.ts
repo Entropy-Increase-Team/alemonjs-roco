@@ -11,7 +11,7 @@ export default async () => {
   const rawArgs = String(route.rawArgs ?? '').trim();
 
   try {
-    if (routeKey === '远行商人' || routeKey === '旅行商人' || routeKey === '商人信息') {
+    if (routeKey.endsWith('远行商人') || routeKey.endsWith('旅行商人') || routeKey.endsWith('商人信息')) {
       const result = await getRocomMerchantInfo();
 
       md.addText(buildRocomMerchantText(result));

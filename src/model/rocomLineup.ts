@@ -108,7 +108,7 @@ export async function getRocomLineupList(event: { current: { Platform?: string; 
   const { credential } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
-    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆、#wgwx登陆 或 +qq登陆、+wx登陆');
+    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆 或 #wgwx登陆');
   }
 
   const params: Record<string, string> = {
@@ -182,7 +182,7 @@ export async function getRocomLineupDetail(event: { current: { Platform?: string
   const { credential } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
-    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆、#wgwx登陆 或 +qq登陆、+wx登陆');
+    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆 或 #wgwx登陆');
   }
 
   const accountType = resolveAccountType(credential.loginType);

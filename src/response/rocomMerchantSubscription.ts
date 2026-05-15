@@ -13,7 +13,7 @@ export default async () => {
   const rawArgs = String(route.rawArgs ?? '').trim();
 
   try {
-    if (routeKey === '取消订阅远行商人' || routeKey === '取消订阅旅行商人') {
+    if (routeKey.endsWith('取消订阅远行商人') || routeKey.endsWith('取消订阅旅行商人')) {
       md.addText(await unsubscribeRocomMerchant(event as unknown as { current: Record<string, unknown> }));
     } else {
       md.addText(await subscribeRocomMerchant(event as unknown as { current: Record<string, unknown> }, rawArgs));

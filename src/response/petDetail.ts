@@ -12,7 +12,7 @@ export default async () => {
   const petName = String(route.param('keyword') ?? '').trim();
 
   if (!petName) {
-    md.addText('[洛克王国] 请输入宠物名，例如: #洛克图鉴 迪莫');
+    md.addText('[洛克] 请输入宠物名，例如：#洛克图鉴 迪莫');
     format.addMarkdown(md);
     void message.send({ format });
 
@@ -22,7 +22,7 @@ export default async () => {
   const pet = findPetByName(petName);
 
   if (!pet) {
-    md.addText(`[洛克王国] 未找到宠物「${petName}」，请检查名称是否正确`);
+    md.addText(`[洛克] 未找到宠物「${petName}」，请检查名称是否正确`);
     format.addMarkdown(md);
     void message.send({ format });
 
@@ -34,7 +34,7 @@ export default async () => {
   });
 
   if (typeof img === 'boolean') {
-    md.addText('[洛克王国] 图鉴卡片渲染失败');
+    md.addText('[洛克] 图鉴卡片渲染失败');
     format.addMarkdown(md);
     void message.send({ format });
 

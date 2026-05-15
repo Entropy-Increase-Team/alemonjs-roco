@@ -1,4 +1,5 @@
 import petsData from '@src/data/rocom/Pets.json';
+import { getRocomCommandPrefixes } from '@src/model/rocom';
 import { getWeGameUserContext, requestWeGame, resolveActiveWeGameCredential } from '@src/model/wegameAccount';
 import { readRocomConfig } from '@src/model/wegameResource';
 
@@ -121,8 +122,18 @@ function resolveZone(loginType?: string): string | undefined {
   return undefined;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildPrefixPattern(): string {
+  return getRocomCommandPrefixes()
+    .map(item => escapeRegExp(item))
+    .join('|');
+}
+
 async function parsePetListArgs(text: string): Promise<{ petSubset: number; pageNo: number }> {
-  const matched = text.match(/^(?:\+|#洛克王国世界|#洛克世界|#洛克)\s*精灵列表(?:\s+(.+))?$/u);
+  const matched = text.match(new RegExp(`^(?:${buildPrefixPattern()})\\s*精灵列表(?:\\s+(.+))?$`, 'u'));
   const raw = normalizeText(matched?.[1]);
 
   if (!raw) {
@@ -256,7 +267,7 @@ export async function getRocomPetList(event: { current: { Platform?: string; Bot
   const { credential, binding } = await resolveActiveWeGameCredential(context);
 
   if (!credential?.frameworkToken) {
-    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆、#wgwx登陆 或 +qq登陆、+wx登陆');
+    throw new Error('当前没有可用的 WeGame 凭证，请先发送 #wgqq登陆 或 #wgwx登陆');
   }
 
   const params: Record<string, string> = {

@@ -15,6 +15,8 @@ type Props = {
         pageNo: number;
         totalPages: number;
         refresh: boolean;
+        filterLabel: string;
+        commandHint: string;
         posters: Poster[];
     };
 };

@@ -1,0 +1,31 @@
+help_title: 'WeGame 帮助'
+help_sub_title: '默认前缀：#wg'
+
+help_group:
+  - group: '基础指令'
+    list:
+      - title: '#wg帮助'
+        desc: '查看插件帮助菜单'
+      - title: '#wgqq登陆'
+        desc: '使用 QQ 扫码登录 WeGame'
+      - title: '#wgwx登陆'
+        desc: '使用微信扫码登录 WeGame'
+      - title: '#wg账号列表'
+        desc: '查看当前已绑定 WeGame 账号列表'
+      - title: '#wg模块'
+        desc: '查看当前已接入模块'
+      - title: '#wg模块下载 rocom'
+        desc: '当前应用不提供模块仓库下载'
+      - title: '#wg更新'
+        desc: '当前应用不负责仓库或模块在线更新'
+      - title: '#wg更新 rocom'
+        desc: '查看模块更新命令示例'
+      - title: '#wg切换账号 1'
+        desc: '切换当前默认账号'
+      - title: '#wg删除账号 1'
+        desc: '删除指定绑定账号'
+
+  - group: '游戏模块'
+    list:
+      - title: '#洛克帮助'
+        desc: '查看洛克王国世界模块帮助'

@@ -9,6 +9,14 @@ type ExchangePoster = {
     isExpired: boolean;
     avatarUrl: string;
 };
+type ExchangeHallResult = {
+    pageNo: number;
+    totalPages: number;
+    refresh: boolean;
+    filterLabel: string;
+    commandHint: string;
+    posters: ExchangePoster[];
+};
 export declare function getRocomExchangeHall(event: {
     current: {
         Platform?: string;
@@ -20,12 +28,9 @@ export declare function getRocomExchangeHall(event: {
     pageNo: number;
     totalPages: number;
     refresh: boolean;
+    filterLabel: string;
+    commandHint: string;
     posters: ExchangePoster[];
 }>;
-export declare function buildRocomExchangeText(payload: {
-    pageNo: number;
-    totalPages: number;
-    refresh: boolean;
-    posters: ExchangePoster[];
-}): string;
+export declare function buildRocomExchangeText(payload: ExchangeHallResult): string;
 export {};

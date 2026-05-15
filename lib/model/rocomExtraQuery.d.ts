@@ -128,6 +128,23 @@ export declare function parseRocomSizeArgs(rawText: string): {
     diameter: string;
     weight: string;
 };
+type RocomSizeMatchCard = {
+    id: string;
+    name: string;
+    icon: string;
+    typeLabel: string;
+    eggGroupsLabel: string;
+    heightLabel: string;
+    weightLabel: string;
+};
+export type RocomEggSizeCardData = {
+    queryLabel: string;
+    hasResults: boolean;
+    perfectMatches: RocomSizeMatchCard[];
+    rangeMatches: RocomSizeMatchCard[];
+    commandHint: string;
+    copyright: string;
+};
 export declare function getRocomSizeQuery(rawText: string): Promise<{
     args: {
         diameter: string;
@@ -135,6 +152,13 @@ export declare function getRocomSizeQuery(rawText: string): Promise<{
     };
     payload: Record<string, unknown>;
 }>;
+export declare function buildRocomSizeCardData(result: {
+    args: {
+        diameter: string;
+        weight: string;
+    };
+    payload: Record<string, unknown>;
+}): RocomEggSizeCardData;
 export declare function buildRocomSizeText(result: {
     args: {
         diameter: string;

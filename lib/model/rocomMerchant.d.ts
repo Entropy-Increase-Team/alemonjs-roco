@@ -4,6 +4,20 @@ type MerchantProduct = {
     timeLabel: string;
     type: string;
 };
+export type RocomMerchantCardData = {
+    title: string;
+    subtitle: string;
+    productCount: number;
+    roundLabel: string;
+    countdown: string;
+    products: Array<{
+        name: string;
+        image: string;
+        timeLabel: string;
+        type: string;
+        slotLabel: string;
+    }>;
+};
 type MerchantRound = {
     date: string;
     current: number | null;
@@ -31,4 +45,5 @@ export declare function extractMerchantProducts(payload?: Record<string, unknown
 };
 export declare function fetchRocomMerchantInfo(refresh?: boolean): Promise<Record<string, unknown>>;
 export declare function buildRocomMerchantText(payload: Record<string, unknown>, now?: Date): string;
+export declare function buildRocomMerchantCardData(payload: Record<string, unknown>, now?: Date): RocomMerchantCardData;
 export {};

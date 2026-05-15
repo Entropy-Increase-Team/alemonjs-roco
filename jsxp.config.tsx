@@ -1,7 +1,7 @@
 import ActiveDate from '@src/img/views/ActiveDate';
 import AnnouncementCard from '@src/img/views/AnnouncementCard';
 import AnnouncementDetailCard from '@src/img/views/AnnouncementDetailCard';
-import YunzaiHelpCard from '@src/img/views/Help';
+import ALemonJSHelpCard from '@src/img/views/Help';
 import PetDetailCard from '@src/img/views/PetDetailCard';
 import PetListCard from '@src/img/views/PetListCard';
 import { defineConfig } from 'jsxp';
@@ -11,7 +11,7 @@ export default defineConfig({
   routes: {
     '/roco-help': {
       component: (
-        <YunzaiHelpCard
+        <ALemonJSHelpCard
           data={{
             title: '洛克王国助手',
             subtitle: '小洛克，欢迎来到洛克王国！',

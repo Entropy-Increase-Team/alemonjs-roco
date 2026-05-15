@@ -132,8 +132,9 @@ function pickRocoWikiGroups(groups: RocomHelpGroup[]): RocomHelpGroup[] {
     return exact;
   }
 
-  const filtered = groups.filter(group => group.menuItems.some(item => item.cmd.startsWith('#roco') || item.cmd.startsWith('/roco') || item.cmd.startsWith('＃roco'))
-  );
+  const filtered = groups.filter(group => {
+    return group.menuItems.some(item => item.cmd.startsWith('#roco') || item.cmd.startsWith('/roco') || item.cmd.startsWith('＃roco'));
+  });
 
   if (hasMenuItems(filtered)) {
     return filtered;
@@ -203,8 +204,8 @@ export async function getRocomHelpCardData() {
     subtitle,
     prefixTitle: '支持前缀',
     prefixText: subtitle.replace(/^支持前缀：/, ''),
-    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
-    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerBrand: 'ALemonJS & WeGame Roco Kingdom Plugin',
+    footerNote: 'ALemonJS & WeGame Roco Kingdom Plugin',
     categories: toHelpCardCategories(groups)
   };
 }
@@ -218,8 +219,8 @@ export async function getWeGameHelpCardData() {
     subtitle: '默认前缀：#wg',
     prefixTitle: '支持前缀',
     prefixText: '#wg',
-    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
-    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerBrand: 'ALemonJS & WeGame Roco Kingdom Plugin',
+    footerNote: 'ALemonJS & WeGame Roco Kingdom Plugin',
     categories: toHelpCardCategories(picked)
   };
 }
@@ -234,8 +235,8 @@ export async function getRocoWikiHelpCardData() {
     subtitle,
     prefixTitle: '支持前缀',
     prefixText: subtitle.replace(/^支持前缀：/, ''),
-    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
-    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerBrand: 'ALemonJS & WeGame Roco Kingdom Plugin',
+    footerNote: 'ALemonJS & WeGame Roco Kingdom Plugin',
     categories: toHelpCardCategories(picked)
   };
 }
@@ -250,8 +251,8 @@ export async function getRocoMainHelpCardData() {
     subtitle,
     prefixTitle: '支持前缀',
     prefixText: subtitle.replace(/^支持前缀：/, ''),
-    footerBrand: 'Yunzai & WeGame Roco Kingdom Plugin',
-    footerNote: 'Yunzai & WeGame Roco Kingdom Plugin',
+    footerBrand: 'ALemonJS & WeGame Roco Kingdom Plugin',
+    footerNote: 'ALemonJS & WeGame Roco Kingdom Plugin',
     categories: toHelpCardCategories(picked)
   };
 }

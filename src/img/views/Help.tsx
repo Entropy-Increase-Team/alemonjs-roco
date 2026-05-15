@@ -25,7 +25,7 @@ export interface HelpCardData {
 
 const width = 780;
 
-export default function YunzaiHelpCard({ data }: { data: HelpCardData }) {
+export default function ALemonJSHelpCard({ data }: { data: HelpCardData }) {
   return (
     <HTML style={{ width: `${width + 60}px`, background: '#faf6ed' }}>
       <div

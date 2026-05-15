@@ -1,4 +1,4 @@
-import YunzaiHelpCard from '@src/img/views/Help';
+import ALemonJSHelpCard from '@src/img/views/Help';
 import WeGameHelpCard from '@src/img/views/WeGameHelp';
 import { buildRocoMainHelpText, buildRocoWikiHelpText, getRocoMainHelpCardData, getRocoWikiHelpCardData } from '@src/model/rocom';
 import {
@@ -28,7 +28,7 @@ export default async () => {
   }
 
   let data;
-  let component = YunzaiHelpCard;
+  let component = ALemonJSHelpCard;
 
   if (isWeGameHelp) {
     data = getWeGameStandaloneHelpCardData();

@@ -1,4 +1,6 @@
 import {
+  buildWeGameLoginSuccessText,
+  buildWeGameBindingListCardData,
   buildBindingsText,
   createWeGameLogin,
   deleteWeGameBinding,
@@ -12,7 +14,9 @@ import {
   syncWeGameBindings,
   waitWeGameLogin
 } from '@src/model/wegameAccount';
+import WeGameBindingListCard from '@src/img/views/WeGameBindingListCard';
 import { Format, useEvent, useMessage, useRoute } from 'alemonjs';
+import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 function buildTextFormat(text: string) {
   const format = Format.create();
@@ -22,6 +26,38 @@ function buildTextFormat(text: string) {
   format.addMarkdown(md);
 
   return format;
+}
+
+function buildTextImageFormat(text: string, image: string) {
+  const format = buildTextFormat(text);
+
+  format.addImage(image);
+
+  return format;
+}
+
+function getLoginStatusText(status: string) {
+  if (status === 'pending') {
+    return '等待扫码';
+  }
+
+  if (status === 'scanned') {
+    return '已扫码，等待手机确认';
+  }
+
+  if (status === 'processing') {
+    return '已确认，正在换取 WeGame 凭证';
+  }
+
+  if (status === 'done') {
+    return '登录成功';
+  }
+
+  if (status === 'expired') {
+    return '二维码已过期';
+  }
+
+  return status || '状态未知';
 }
 
 function extractAccountIndex(raw: string, usage: string): number {
@@ -54,27 +90,26 @@ export default async () => {
       }
 
       void message.send({
-        format: buildTextFormat(
-          ['请使用另外一台设备的 QQ 扫描下方链接中的二维码完成 WeGame 登录。', `二维码地址：${qrImage}`, '登录成功后会自动同步到账号绑定列表。'].join('\n')
+        format: buildTextImageFormat(
+          ['请使用另外一台设备的 QQ 扫描下方链接中的二维码完成 WeGame 登录。', `二维码地址：${qrImage}`, '登录成功后会自动同步到账号绑定列表。'].join('\n'),
+          qrImage
         )
       });
 
-      const credential = await waitWeGameLogin(context.userIdentifier, context.userKey, 'qq', frameworkToken);
+      const credential = await waitWeGameLogin(context.userIdentifier, context.userKey, 'qq', frameworkToken, {
+        onStatusChange: status => {
+          if (status === 'scanned') {
+            void message.send({
+              format: buildTextFormat(`QQ二维码状态：${getLoginStatusText(status)}。`)
+            });
+          }
+        }
+      });
       const bindings = await syncWeGameBindings(context);
       const active = pickActiveBinding(bindings);
 
       void message.send({
-        format: buildTextFormat(
-          [
-            '登录成功。',
-            `登录方式：${formatLoginType(active?.loginType ?? credential.loginType ?? 'qq')}`,
-            `当前账号：${active ? getBindingName(active) : (credential.role?.name ?? credential.tgpId ?? '未返回')}`,
-            active?.roleId ? `角色ID：${active.roleId}` : '',
-            '可发送 #wg账号列表 查看已绑定账号。'
-          ]
-            .filter(Boolean)
-            .join('\n')
-        )
+        format: buildTextFormat(buildWeGameLoginSuccessText(active, credential))
       });
 
       return;
@@ -90,27 +125,26 @@ export default async () => {
       }
 
       void message.send({
-        format: buildTextFormat(
-          ['请使用另外一台设备的微信扫描下方链接中的二维码完成 WeGame 登录。', `二维码地址：${qrImage}`, '登录成功后会自动同步到账号绑定列表。'].join('\n')
+        format: buildTextImageFormat(
+          ['请使用另外一台设备的微信扫描下方链接中的二维码完成 WeGame 登录。', `二维码地址：${qrImage}`, '登录成功后会自动同步到账号绑定列表。'].join('\n'),
+          qrImage
         )
       });
 
-      const credential = await waitWeGameLogin(context.userIdentifier, context.userKey, 'wechat', frameworkToken);
+      const credential = await waitWeGameLogin(context.userIdentifier, context.userKey, 'wechat', frameworkToken, {
+        onStatusChange: status => {
+          if (status === 'scanned') {
+            void message.send({
+              format: buildTextFormat(`微信二维码状态：${getLoginStatusText(status)}。`)
+            });
+          }
+        }
+      });
       const bindings = await syncWeGameBindings(context);
       const active = pickActiveBinding(bindings);
 
       void message.send({
-        format: buildTextFormat(
-          [
-            '登录成功。',
-            `登录方式：${formatLoginType(active?.loginType ?? credential.loginType ?? 'wechat')}`,
-            `当前账号：${active ? getBindingName(active) : (credential.role?.name ?? credential.tgpId ?? '未返回')}`,
-            active?.roleId ? `角色ID：${active.roleId}` : '',
-            '可发送 #wg账号列表 查看已绑定账号。'
-          ]
-            .filter(Boolean)
-            .join('\n')
-        )
+        format: buildTextFormat(buildWeGameLoginSuccessText(active, credential))
       });
 
       return;
@@ -132,9 +166,22 @@ export default async () => {
         return;
       }
 
-      void message.send({
-        format: buildTextFormat(['WeGame 绑定列表', '', buildBindingsText(bindings), '', '切换：#wg切换账号 <序号>', '删除：#wg删除账号 <序号>'].join('\n'))
+      const img = await renderComponentIsHtmlToBuffer(WeGameBindingListCard, {
+        data: buildWeGameBindingListCardData(bindings)
       });
+
+      if (typeof img === 'boolean') {
+        void message.send({
+          format: buildTextFormat(['WeGame 绑定列表', '', buildBindingsText(bindings), '', '切换：#wg切换账号 <序号>', '删除：#wg删除账号 <序号>'].join('\n'))
+        });
+
+        return;
+      }
+
+      const format = Format.create();
+
+      format.addImage(img);
+      void message.send({ format });
 
       return;
     }
@@ -166,7 +213,8 @@ export default async () => {
           [
             `已切换默认账号为：${current ? getBindingName(current) : getBindingName(target)}`,
             `登录方式：${formatLoginType(current?.loginType ?? target.loginType)}`,
-            current?.roleId ? `角色ID：${current.roleId}` : ''
+            `角色ID：${current?.roleId ?? target.roleId ?? '未返回'}`,
+            '后续游戏模块查询会优先使用这个账号。'
           ]
             .filter(Boolean)
             .join('\n')
@@ -198,6 +246,7 @@ export default async () => {
         format: buildTextFormat(
           [
             `已删除账号：${getBindingName(target)}`,
+            `登录方式：${formatLoginType(target.loginType)}`,
             `剩余绑定数量：${refreshed.length}`,
             current ? `当前默认账号：${getBindingName(current)}` : '当前已没有可用绑定账号。'
           ].join('\n')

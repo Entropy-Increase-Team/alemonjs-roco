@@ -24,226 +24,355 @@ type Props = {
   };
 };
 
+const tabs = ['全部', '了不起', '异色', '炫彩'];
+const width = 1320;
 const columns = 5;
-const width = 1280;
 
-function getRarityColor(value: string): string {
-  if (value === '了不起') {
-    return '#ffca5c';
-  }
-
-  if (value === '异色') {
-    return '#6ed6ff';
-  }
-
-  if (value === '炫彩') {
-    return '#ff7de1';
-  }
-
-  return '#8fb47a';
+function getTypeTokens(types: string) {
+  return String(types || '')
+    .split(/[、/\s]+/u)
+    .map(item => item.trim())
+    .filter(Boolean)
+    .slice(0, 2);
 }
 
 export default function RocomPetPackageCard({ data }: Props) {
   const { currentTab, userName, userLevel, userUid, totalCount, currentPage, totalPages, accountLabel, pets, pageSize } = data;
   const emptySlots = Math.max(pageSize - pets.length, 0);
-  const rows = Math.ceil(pageSize / columns);
 
   return (
-    <HTML style={{ width: `${width}px`, background: 'linear-gradient(180deg, #1f221d 0%, #11130f 100%)' }}>
+    <HTML style={{ width: `${width}px`, background: '#1b1d18' }}>
       <div
         style={{
           width: `${width}px`,
-          minHeight: `${rows * 260 + 280}px`,
+          padding: '30px',
           boxSizing: 'border-box',
-          padding: '28px',
           background:
-            'radial-gradient(circle at top left, rgba(255, 206, 109, 0.22), transparent 28%), radial-gradient(circle at top right, rgba(122, 181, 202, 0.18), transparent 24%), linear-gradient(180deg, #272b24 0%, #171914 100%)',
-          color: '#f4efe2'
+            'radial-gradient(circle at top left, rgba(255,206,109,0.22), transparent 28%), radial-gradient(circle at top right, rgba(122,181,202,0.18), transparent 24%), linear-gradient(180deg, #272b24 0%, #171914 100%)'
         }}
       >
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '10px 6px 18px',
-            borderBottom: '1px solid rgba(255,255,255,0.08)'
+            minWidth: '900px',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '20px',
+            padding: '16px 20px 16px',
+            boxSizing: 'border-box'
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '30%', textAlign: 'left' }}>
-            <div style={{ fontSize: '34px', fontWeight: 900, letterSpacing: '2px' }}>我的精灵</div>
-            <div style={{ fontSize: '18px', color: '#d9d1bd' }}>
-              {userName} · Lv.{userLevel}
-            </div>
-            <div style={{ fontSize: '14px', color: 'rgba(244,239,226,0.62)' }}>ID: {userUid || '未返回'} </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '40%' }}>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {['全部', '了不起', '异色', '炫彩'].map(item => (
-                <span
-                  key={item}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '999px',
-                    fontSize: '15px',
-                    fontWeight: 800,
-                    background: item === currentTab ? 'linear-gradient(135deg, #ffcc67, #ff9758)' : 'rgba(255,255,255,0.08)',
-                    color: item === currentTab ? '#2f2312' : '#f4efe2'
-                  }}
-                >
-                  {item === '全部' ? '全部精灵' : `${item}精灵`}
-                </span>
-              ))}
-            </div>
-            <div style={{ fontSize: '13px', color: 'rgba(244,239,226,0.72)' }}>当前账号：{accountLabel}</div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '30%', textAlign: 'right' }}>
-            <div style={{ fontSize: '16px', color: '#f3bf66', fontWeight: 800 }}>当前查看：{currentTab}</div>
-            <div style={{ fontSize: '15px', color: '#f4efe2' }}>总计持有：{totalCount}</div>
-            <div style={{ fontSize: '15px', color: '#f4efe2' }}>
-              第 {currentPage} / {totalPages} 页
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: '22px',
-            display: 'grid',
-            gridTemplateColumns: `repeat(${columns}, 1fr)`,
-            gap: '18px'
-          }}
-        >
-          {pets.map((pet, index) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div
-              key={`${pet.name}-${index}`}
               style={{
-                borderRadius: '28px',
-                overflow: 'hidden',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02))',
-                border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 18px 38px rgba(0,0,0,0.28)',
-                height: '252px',
-                position: 'relative'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: '8px',
+                borderBottom: '2px solid rgba(255, 255, 255, 0.1)'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px 0' }}>
-                <span
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                <div
                   style={{
-                    display: 'inline-flex',
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '18px',
+                    background: 'linear-gradient(180deg, #ffd87b 0%, #ffc65f 100%)',
+                    color: '#272624',
+                    display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minWidth: '58px',
-                    height: '28px',
-                    borderRadius: '999px',
-                    background: 'rgba(255,255,255,0.08)',
-                    color: '#f4efe2',
-                    fontSize: '13px',
+                    fontSize: '24px',
                     fontWeight: 800
                   }}
                 >
-                  {pet.types}
-                </span>
-                <span style={{ fontSize: '24px', fontWeight: 900, color: '#ffe19b' }}>Lv.{pet.level}</span>
-              </div>
-
-              <div
-                style={{
-                  height: '150px',
-                  margin: '8px 14px 0',
-                  borderRadius: '24px',
-                  background:
-                    'radial-gradient(circle at top, rgba(255,255,255,0.22), transparent 35%), linear-gradient(180deg, rgba(252,233,187,0.72), rgba(242,193,101,0.22))',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
-                {pet.imageUrl ? (
-                  <img
-                    src={pet.imageUrl}
-                    alt={pet.name}
-                    style={{
-                      maxWidth: '92%',
-                      maxHeight: '92%',
-                      objectFit: 'contain',
-                      filter: 'drop-shadow(0 12px 22px rgba(0,0,0,0.22))'
-                    }}
-                  />
-                ) : (
-                  <div style={{ fontSize: '48px', fontWeight: 900, color: 'rgba(0,0,0,0.18)' }}>{pet.name.slice(0, 1)}</div>
-                )}
-              </div>
-
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '14px',
-                  right: '14px',
-                  bottom: '14px',
-                  borderRadius: '18px',
-                  background: 'linear-gradient(135deg, #f6d27c 0%, #d88f43 100%)',
-                  color: '#2f2312',
-                  padding: '10px 14px'
-                }}
-              >
-                <div style={{ fontSize: '22px', fontWeight: 900, lineHeight: 1.1 }}>{pet.name}</div>
-                <div style={{ marginTop: '4px', fontSize: '13px', fontWeight: 800, color: '#573e1b' }}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '4px 10px',
-                      borderRadius: '999px',
-                      background: getRarityColor(pet.rarity),
-                      color: pet.rarity === '常规' ? '#16301d' : '#29151f'
-                    }}
-                  >
-                    {pet.rarity}
-                  </span>
+                  洛
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#f4eee1', fontSize: '22px', fontWeight: 800 }}>{userName}</span>
+                    <span
+                      style={{
+                        backgroundColor: '#ffc966',
+                        color: '#272624',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                        lineHeight: 1.2
+                      }}
+                    >
+                      Lv. {userLevel}
+                    </span>
+                  </div>
+                  <span style={{ color: '#a8a69f', fontSize: '14px' }}>ID:{userUid || '未返回'}</span>
                 </div>
               </div>
-            </div>
-          ))}
 
-          {Array.from({ length: emptySlots }).map((_, index) => (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                <div
+                  style={{
+                    color: '#f4eee1',
+                    fontSize: '24px',
+                    fontWeight: 800,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                    lineHeight: 1
+                  }}
+                >
+                  我的精灵
+                </div>
+                <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: '15px' }}>
+                  {tabs.map(item => (
+                    <li
+                      key={item}
+                      style={{
+                        color: item === currentTab ? '#f4eee1' : '#a8a69f',
+                        fontSize: '16px',
+                        padding: '2px 0',
+                        borderBottom: item === currentTab ? '2px solid #ffc65f' : '2px solid transparent',
+                        fontWeight: 700
+                      }}
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '2px', flex: 1 }}>
+                <span style={{ color: '#f1b958', fontSize: '16px', fontWeight: 800 }}>当前查看：{currentTab}</span>
+                <span style={{ color: '#f4eee1', fontSize: '14px' }}>总计持有：{totalCount}</span>
+                <span style={{ color: '#f4eee1', fontSize: '14px' }}>当前账号：{accountLabel}</span>
+              </div>
+            </div>
+
+            <main style={{ marginTop: '5px' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: `repeat(${columns}, 1.9rem)`,
+                  gridTemplateRows: 'repeat(2, 2.6rem)',
+                  gap: '0.2rem 0.25rem',
+                  justifyContent: 'center'
+                }}
+              >
+                {pets.length > 0 ? (
+                  <>
+                    {pets.map((pet, index) => (
+                      <div
+                        key={`${pet.name}-${index}`}
+                        style={{
+                          width: '1.9rem',
+                          height: '2.6rem',
+                          background: 'linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04))',
+                          borderRadius: '0.28rem',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            padding: '0.15rem 0.2rem 0',
+                            zIndex: 2
+                          }}
+                        >
+                          <div style={{ display: 'flex', gap: '0.05rem' }}>
+                            {getTypeTokens(pet.types).length > 0 ? (
+                              getTypeTokens(pet.types).map((token, tokenIndex) => (
+                                <div
+                                  key={`${pet.name}-${token}-${tokenIndex}`}
+                                  style={{
+                                    width: '0.28rem',
+                                    height: '0.28rem',
+                                    borderRadius: '50%',
+                                    background: 'rgba(255,255,255,0.14)',
+                                    color: '#f4eee1',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.12rem',
+                                    fontWeight: 700
+                                  }}
+                                >
+                                  {token.slice(0, 1)}
+                                </div>
+                              ))
+                            ) : (
+                              <div
+                                style={{
+                                  width: '0.28rem',
+                                  height: '0.28rem',
+                                  borderRadius: '50%',
+                                  background: 'rgba(255,255,255,0.14)',
+                                  color: '#f4eee1',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.14rem'
+                                }}
+                              >
+                                ?
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.22rem', color: '#555350', fontWeight: 800 }}>LV.{pet.level}</div>
+                        </div>
+
+                        <div
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'center',
+                            position: 'relative',
+                            paddingTop: '0.1rem'
+                          }}
+                        >
+                          <div style={{ width: '1.7rem', height: '1.45rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {pet.imageUrl ? (
+                              <img
+                                src={pet.imageUrl}
+                                alt={pet.name}
+                                style={{
+                                  maxWidth: '100%',
+                                  maxHeight: '100%',
+                                  objectFit: 'contain',
+                                  filter: 'drop-shadow(0 0.06rem 0.12rem rgba(0, 0, 0, 0.18))'
+                                }}
+                              />
+                            ) : (
+                              <div style={{ color: '#7d7568', fontSize: '0.2rem', fontWeight: 800 }}>空位</div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '0.45rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'absolute',
+                            bottom: '0.06rem',
+                            left: 0,
+                            right: 0
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: '#272624',
+                              fontSize: '0.22rem',
+                              fontWeight: 800,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              padding: '0 0.06rem'
+                            }}
+                          >
+                            {pet.name}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {Array.from({ length: emptySlots }).map((_, index) => (
+                      <div
+                        key={`empty-${index}`}
+                        style={{
+                          width: '1.9rem',
+                          height: '2.6rem',
+                          borderRadius: '0.28rem',
+                          border: '1px dashed rgba(255,255,255,0.12)',
+                          background: 'rgba(255,255,255,0.03)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          position: 'relative',
+                          opacity: 0.42
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.15rem 0.2rem 0' }}>
+                          <div />
+                          <div style={{ fontSize: '0.22rem', color: '#555350', fontWeight: 800 }}>--</div>
+                        </div>
+                        <div
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#7d7568',
+                            fontSize: '0.2rem',
+                            fontWeight: 800
+                          }}
+                        >
+                          空位
+                        </div>
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '0.45rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'absolute',
+                            bottom: '0.06rem',
+                            left: 0,
+                            right: 0,
+                            color: '#272624',
+                            fontSize: '0.22rem',
+                            fontWeight: 800
+                          }}
+                        >
+                          待补位
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      minHeight: '5.4rem',
+                      gridColumn: '1 / -1',
+                      borderRadius: '0.24rem',
+                      border: '1px dashed rgba(255, 255, 255, 0.18)',
+                      background: 'rgba(0, 0, 0, 0.14)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.12rem'
+                    }}
+                  >
+                    <div style={{ color: '#f4eee1', fontSize: '0.24rem', fontWeight: 800 }}>这一页暂时没有精灵</div>
+                    <div style={{ color: '#b9b1a2', fontSize: '0.15rem' }}>试试切换分类或页码重新查询</div>
+                  </div>
+                )}
+              </div>
+            </main>
+
             <div
-              key={`empty-${index}`}
               style={{
-                borderRadius: '28px',
-                border: '1px dashed rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.03)',
-                height: '252px',
                 display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                justifyContent: 'center',
-                color: 'rgba(244,239,226,0.36)',
-                fontSize: '28px',
-                fontWeight: 900
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                paddingTop: '14px',
+                fontSize: '14px',
+                color: 'rgba(244,239,226,0.66)'
               }}
             >
-              空位
+              <span>
+                第 {currentPage} 页，共 {totalPages} 页，每页 {pageSize} 只精灵
+              </span>
+              <span>翻页：+精灵列表 &lt;了不起|异色|炫彩&gt; &lt;页码&gt;</span>
             </div>
-          ))}
-        </div>
-
-        <div
-          style={{
-            marginTop: '22px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-            paddingTop: '14px',
-            fontSize: '14px',
-            color: 'rgba(244,239,226,0.66)'
-          }}
-        >
-          <span>翻页：+精灵列表 &lt;了不起|异色|炫彩&gt; &lt;页码&gt;</span>
-          <span>Powered by alemonjs</span>
+          </div>
         </div>
       </div>
     </HTML>

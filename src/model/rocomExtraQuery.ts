@@ -194,6 +194,7 @@ export async function getRocomHome(event: { current: { Platform?: string; BotId?
     (homeInfo.friend_home_brief_info as Record<string, unknown> | undefined) ?? (homeInfo.home_brief_info as Record<string, unknown> | undefined) ?? homeInfo;
 
   return {
+    rawPayload: resolved,
     uid,
     homeName: formatSearchValue(brief.home_name ?? brief.name),
     roomLevel: formatSearchValue(brief.room_level),
@@ -220,6 +221,431 @@ export function buildRocomHomeText(payload: {
     `家园经验：${payload.homeExperience}`,
     `舒适度：${payload.comfortLevel}`
   ].join('\n');
+}
+
+type RocomHomeSummaryCard = {
+  label: string;
+  value: string;
+};
+
+type RocomHomePetCard = {
+  id: string;
+  name: string;
+  level: string;
+  iconUrl: string;
+  badge: string;
+  isGuard: boolean;
+  statusText: string;
+  statusClass: 'guard' | 'ready' | 'progress' | 'idle';
+  note: string;
+};
+
+type RocomHomeGardenPlot = {
+  id: string;
+  landIndex: string;
+  plantName: string;
+  statusText: string;
+  stateType: 'ready' | 'warning';
+  leftTimeText: string;
+  progress: number;
+  harvestText: string;
+  stealText: string;
+};
+
+export type RocomHomeCardData = {
+  title: string;
+  subtitle: string;
+  homeName: string;
+  uid: string;
+  updatedAt: string;
+  summaryCards: RocomHomeSummaryCard[];
+  gardenPlots: RocomHomeGardenPlot[];
+  guardPets: RocomHomePetCard[];
+  indoorPets: RocomHomePetCard[];
+  gardenCount: number;
+  indoorCount: number;
+  guardCount: number;
+  guardEmptyText: string;
+};
+
+function toNumber(value: unknown, fallback = 0): number {
+  const num = Number(value);
+
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function normalizeTimestampSeconds(value: unknown): number {
+  const num = Number(value);
+
+  if (!Number.isFinite(num) || num <= 0) {
+    return 0;
+  }
+  if (num > 1e14) {
+    return Math.floor(num / 1000000);
+  }
+  if (num > 1e11) {
+    return Math.floor(num / 1000);
+  }
+
+  return Math.floor(num);
+}
+
+function normalizeDurationSeconds(value: unknown): number {
+  const num = Number(value);
+
+  if (!Number.isFinite(num) || num <= 0) {
+    return 0;
+  }
+  if (num > 1e11) {
+    return Math.floor(num / 1000000);
+  }
+  if (num > 1e8) {
+    return Math.floor(num / 1000);
+  }
+
+  return Math.floor(num);
+}
+
+function formatRemaining(targetTime: unknown, now = Math.floor(Date.now() / 1000)): string {
+  const target = normalizeTimestampSeconds(targetTime);
+
+  if (!target) {
+    return '未开始';
+  }
+  if (now >= target) {
+    return '已完成';
+  }
+
+  const remain = Math.max(0, target - now);
+  let hours = Math.floor(remain / 3600);
+  const minutes = Math.floor((remain % 3600) / 60);
+
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+
+    hours %= 24;
+
+    return `${days}天${hours}小时`;
+  }
+  if (hours > 0) {
+    return `${hours}小时${minutes}分钟`;
+  }
+
+  return `${minutes}分钟`;
+}
+
+function buildProgress(targetTime: unknown, duration: unknown, now = Math.floor(Date.now() / 1000)): number {
+  const target = normalizeTimestampSeconds(targetTime);
+  const cost = normalizeDurationSeconds(duration);
+
+  if (!target) {
+    return 0;
+  }
+  if (now >= target) {
+    return 100;
+  }
+  if (!cost) {
+    return 5;
+  }
+
+  return Math.max(5, Math.min(100, Math.round(((cost - (target - now)) / cost) * 100)));
+}
+
+function assetPetId(petId: unknown): string {
+  const numeric = Number(petId);
+
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return '';
+  }
+
+  return numeric >= 3000 ? String(numeric) : String(numeric + 3000);
+}
+
+function buildPetIconUrl(petId: unknown): string {
+  const id = assetPetId(petId);
+
+  if (!id) {
+    return '';
+  }
+
+  return `https://game.gtimg.cn/images/rocom/rocodata/jingling/${id}/icon.png`;
+}
+
+function pickHomePayload(payload: Record<string, unknown>): Record<string, unknown> {
+  const homeInfo = toRecord(payload.home_info);
+  const nestedHomeInfo = toRecord(homeInfo?.home_info);
+  const data = toRecord(payload.data);
+  const dataHomeInfo = toRecord(data?.home_info);
+  const result = toRecord(payload.result);
+  const resultHomeInfo = toRecord(result?.home_info);
+
+  if (toRecord(homeInfo?.friend_home_brief_info)) {
+    return homeInfo as Record<string, unknown>;
+  }
+  if (toRecord(nestedHomeInfo?.friend_home_brief_info)) {
+    return nestedHomeInfo as Record<string, unknown>;
+  }
+  if (toRecord(dataHomeInfo?.friend_home_brief_info)) {
+    return dataHomeInfo as Record<string, unknown>;
+  }
+  if (toRecord(resultHomeInfo?.friend_home_brief_info)) {
+    return resultHomeInfo as Record<string, unknown>;
+  }
+
+  return homeInfo ?? data ?? result ?? payload;
+}
+
+function extractPet(item: Record<string, unknown>, now = Math.floor(Date.now() / 1000), guard = false): RocomHomePetCard | null {
+  const homePetInfo = toRecord(item.home_pet_info) ?? item;
+  const displayInfo = toRecord(item.display_info) ?? {};
+  const feedInfo = toRecord(homePetInfo.feed_info);
+  const petId = homePetInfo.pet_cfg_id ?? homePetInfo.pet_id ?? homePetInfo.pet_base_id ?? item.pet_cfg_id ?? item.pet_id ?? item.id;
+
+  if (!toNumber(petId, 0) && !guard) {
+    return null;
+  }
+
+  const name = normalizeText(homePetInfo.name ?? homePetInfo.pet_name ?? item.name ?? item.pet_name) || `精灵 ${String(petId ?? '').trim()}`.trim();
+  const beginTime = feedInfo ? normalizeTimestampSeconds(feedInfo.begin_time) : 0;
+  const timeCost = feedInfo ? normalizeDurationSeconds(feedInfo.time_cost) : 0;
+  let ripTime = normalizeTimestampSeconds(homePetInfo.pet_rip_time ?? item.pet_rip_time ?? item.rip_time);
+
+  if (!ripTime && beginTime && timeCost) {
+    ripTime = beginTime + timeCost;
+  }
+
+  const hasInspiration = Boolean(ripTime);
+  const inspireReady = hasInspiration && now >= ripTime;
+  const status = normalizeText(item.status).toLowerCase();
+  const isGuard = guard || item.is_guard === true || item.guard === true || status === '2' || status === 'guard';
+  const statusText = isGuard && !hasInspiration ? '守卫中' : inspireReady ? '灵感已完成' : hasInspiration ? '灵感收集中' : '未喂食';
+  const statusClass: RocomHomePetCard['statusClass'] = isGuard && !hasInspiration ? 'guard' : inspireReady ? 'ready' : hasInspiration ? 'progress' : 'idle';
+
+  return {
+    id: String(petId ?? ''),
+    name,
+    level: normalizeText(displayInfo.level ?? item.level ?? homePetInfo.level) || '--',
+    iconUrl: buildPetIconUrl(petId),
+    badge: isGuard ? '守' : '',
+    isGuard,
+    statusText,
+    statusClass,
+    note: hasInspiration ? formatRemaining(ripTime, now) : isGuard ? '家园守卫位' : '暂无灵感倒计时'
+  };
+}
+
+function collectPetSources(homeInfo: Record<string, unknown>): {
+  indoorSources: Record<string, unknown>[];
+  guardSources: Record<string, unknown>[];
+} {
+  const cellInfo = toRecord(homeInfo.friend_cell_home_brief_info) ?? toRecord(homeInfo.cell_info) ?? {};
+  const indoorSources: Record<string, unknown>[] = [];
+  const guardSources: Record<string, unknown>[] = [];
+
+  const homePets = Array.isArray(homeInfo.home_pets) ? homeInfo.home_pets : [];
+
+  for (const pet of homePets) {
+    if (toRecord(pet)) {
+      indoorSources.push(toRecord(pet) as Record<string, unknown>);
+    }
+  }
+
+  const cellHomePets = Array.isArray(cellInfo.home_pets) ? cellInfo.home_pets : [];
+
+  for (const pet of cellHomePets) {
+    const row = toRecord(pet);
+    const homePet = toRecord(row?.home_pet_info) ?? {};
+
+    if (!row) {
+      continue;
+    }
+    if (String(homePet.pet_cfg_id ?? '0') === '0' && (homePet.name || homePet.pet_name)) {
+      guardSources.push(row);
+    } else {
+      indoorSources.push(row);
+    }
+  }
+
+  const petInfo = toRecord(cellInfo.home_pet_info) ?? {};
+  const homePetList = Array.isArray(petInfo.home_pet_list) ? petInfo.home_pet_list : [];
+
+  for (const pet of homePetList) {
+    const row = toRecord(pet);
+
+    if (row) {
+      indoorSources.push(row);
+    }
+  }
+
+  for (const key of ['guard_pets', 'home_guard_pets', 'guard_pet_list'] as const) {
+    const homeRows = Array.isArray(homeInfo[key]) ? homeInfo[key] : [];
+    const cellRows = Array.isArray(cellInfo[key]) ? cellInfo[key] : [];
+
+    for (const row of [...homeRows, ...cellRows]) {
+      const item = toRecord(row);
+
+      if (item) {
+        guardSources.push(item);
+      }
+    }
+  }
+
+  for (const key of [
+    'guard_pet',
+    'home_guard_pet',
+    'guard_pet_info',
+    'home_guard_pet_info',
+    'defend_pet',
+    'defend_pet_info',
+    'protect_pet',
+    'protect_pet_info'
+  ] as const) {
+    const homeRow = toRecord(homeInfo[key]);
+    const cellRow = toRecord(cellInfo[key]);
+
+    if (homeRow) {
+      guardSources.push(homeRow);
+    }
+    if (cellRow) {
+      guardSources.push(cellRow);
+    }
+  }
+
+  return { indoorSources, guardSources };
+}
+
+function extractPlants(homeInfo: Record<string, unknown>): RocomHomeGardenPlot[] {
+  const cellInfo = toRecord(homeInfo.friend_cell_home_brief_info) ?? toRecord(homeInfo.cell_info) ?? {};
+  const plantSources: Record<string, unknown>[] = [];
+  const directPlants = Array.isArray(homeInfo.home_plants) ? homeInfo.home_plants : [];
+
+  for (const plant of directPlants) {
+    const item = toRecord(plant);
+
+    if (item) {
+      plantSources.push(item);
+    }
+  }
+
+  const plantInfo = toRecord(cellInfo.home_plant_info) ?? {};
+  const landList = Array.isArray(plantInfo.home_plant_land_list) ? plantInfo.home_plant_land_list : [];
+
+  for (const land of landList) {
+    const landRow = toRecord(land);
+    const homePlantList = Array.isArray(landRow?.home_plant_list) ? landRow.home_plant_list : [];
+
+    for (const plant of homePlantList) {
+      const item = toRecord(plant);
+
+      if (item) {
+        plantSources.push({
+          ...item,
+          land_index: item.land_index ?? landRow?.land_index
+        });
+      }
+    }
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const result: RocomHomeGardenPlot[] = [];
+
+  for (let index = 0; index < plantSources.length; index += 1) {
+    const raw = plantSources[index];
+    const plantData = toRecord(raw.plant_info) ?? raw;
+    const plantId = raw.plant_seed_id ?? raw.plant_cfg_id ?? raw.plant_id ?? plantData.id;
+
+    if (!toNumber(plantId, 0)) {
+      continue;
+    }
+
+    let ripTime = normalizeTimestampSeconds(raw.plant_rip_time ?? raw.rip_time ?? raw.end_time);
+    const leftTime = toNumber(raw.left_time, 0);
+
+    if (!ripTime && leftTime > 0) {
+      ripTime = now + leftTime;
+    }
+
+    const ready = (ripTime > 0 && now >= ripTime) || raw.status === 2 || raw.status === 'ready' || raw.status === 'mature';
+    let total = toNumber(raw.time_cost ?? raw.total_time, 0);
+
+    if (!total && raw.plant_tab_id) {
+      total = toNumber(raw.plant_tab_id, 1) * 21600;
+    }
+
+    result.push({
+      id: String(plantId),
+      landIndex: normalizeText(raw.slot_index ?? raw.land_index ?? index + 1),
+      plantName: normalizeText(plantData.name ?? raw.name) || `种子 ${plantId}`,
+      statusText: ready ? '已成熟' : '成长中',
+      stateType: ready ? 'ready' : 'warning',
+      leftTimeText: ready ? '可收获' : formatRemaining(ripTime, now),
+      progress: total && ripTime ? buildProgress(ripTime, total, now) : ready ? 100 : 35,
+      harvestText: raw.plant_harvest_num !== null && raw.plant_harvest_num !== undefined ? `产量 ${raw.plant_harvest_num}` : '',
+      stealText:
+        raw.plant_steal_account !== null &&
+        raw.plant_steal_account !== undefined &&
+        raw.plant_can_steal_account !== null &&
+        raw.plant_can_steal_account !== undefined
+          ? `可偷 ${raw.plant_steal_account}/${raw.plant_can_steal_account}`
+          : ''
+    });
+  }
+
+  return result;
+}
+
+export function buildRocomHomeCardData(payload: Record<string, unknown>, uid: string): RocomHomeCardData {
+  const homeInfo = pickHomePayload(payload);
+  const brief = toRecord(homeInfo.friend_home_brief_info) ?? toRecord(homeInfo.home_brief_info) ?? toRecord(homeInfo.brief) ?? homeInfo;
+  const now = Math.floor(Date.now() / 1000);
+  const { indoorSources, guardSources } = collectPetSources(homeInfo);
+  const indoorPets: RocomHomePetCard[] = [];
+  const guardPets: RocomHomePetCard[] = [];
+
+  for (const petSource of indoorSources) {
+    const pet = extractPet(petSource, now, false);
+
+    if (!pet) {
+      continue;
+    }
+    if (pet.isGuard) {
+      guardPets.push(pet);
+    } else {
+      indoorPets.push(pet);
+    }
+  }
+
+  for (const petSource of guardSources) {
+    const pet = extractPet(petSource, now, true);
+
+    if (pet) {
+      guardPets.push(pet);
+    }
+  }
+
+  const gardenPlots = extractPlants(homeInfo);
+  const homeName = normalizeText(brief.home_name ?? brief.name) || '洛克玩家';
+
+  return {
+    title: '洛克家园',
+    subtitle: 'Home Information',
+    homeName,
+    uid,
+    updatedAt: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
+    summaryCards: [
+      { label: '房间等级', value: normalizeText(brief.room_level) || '--' },
+      { label: '家园等级', value: normalizeText(brief.home_level) || '--' },
+      { label: '家园经验', value: normalizeText(brief.home_experience) || '--' },
+      { label: '舒适度', value: normalizeText(brief.home_comfort_level) || '--' }
+    ],
+    gardenPlots,
+    guardPets,
+    indoorPets,
+    gardenCount: gardenPlots.length,
+    indoorCount: indoorPets.length,
+    guardCount: guardPets.length,
+    guardEmptyText: '后端当前返回中没有守卫精灵字段'
+  };
 }
 
 function resolveBattleZone(loginType?: string): string | undefined {

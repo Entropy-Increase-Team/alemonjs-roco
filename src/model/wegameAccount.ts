@@ -36,7 +36,7 @@ type WeGameCredential = {
   } | null;
 };
 
-type WeGameBinding = {
+export type WeGameBinding = {
   id: string;
   frameworkToken: string;
   tokenType: string;
@@ -52,6 +52,33 @@ type WeGameBinding = {
   isValid: boolean;
   createdAt: string;
   updatedAt: string;
+};
+
+type WeGameBindingCardBadge = {
+  text: string;
+  type: 'primary' | 'valid' | 'invalid';
+};
+
+export type WeGameBindingCardItem = {
+  index: number;
+  total: number;
+  nickname: string;
+  statusText: string;
+  loginType: string;
+  tgpId: string;
+  updatedAt: string;
+  roleId: string;
+  isPrimary: boolean;
+  badges: WeGameBindingCardBadge[];
+};
+
+export type WeGameBindingListCardData = {
+  title: string;
+  subtitle: string;
+  bindings: WeGameBindingCardItem[];
+  emptyText: string;
+  tip: string;
+  copyright: string;
 };
 
 type WeGameUserState = {
@@ -392,11 +419,20 @@ export async function createWeGameLogin(userIdentifier: string, platform: 'qq' |
   });
 }
 
-export async function waitWeGameLogin(userIdentifier: string, userKey: string, platform: 'qq' | 'wechat', frameworkToken: string) {
+export async function waitWeGameLogin(
+  userIdentifier: string,
+  userKey: string,
+  platform: 'qq' | 'wechat',
+  frameworkToken: string,
+  options: {
+    onStatusChange?: (status: string) => void | Promise<void>;
+  } = {}
+) {
   const config = await readWeGameConfig();
   const statusPath = platform === 'wechat' ? '/api/v1/login/wegame/wechat/status' : '/api/v1/login/wegame/status';
   const tokenPath = platform === 'wechat' ? '/api/v1/login/wegame/wechat/token' : '/api/v1/login/wegame/token';
   const startedAt = Date.now();
+  let lastStatus = '';
 
   while (Date.now() - startedAt < config.login_timeout_ms) {
     const statusPayload = await request<{ status?: string; code?: number }>(statusPath, {
@@ -412,6 +448,12 @@ export async function waitWeGameLogin(userIdentifier: string, userKey: string, p
     });
 
     const status = normalizeText(statusPayload.status).toLowerCase();
+
+    if (status && status !== lastStatus) {
+      lastStatus = status;
+
+      await options.onStatusChange?.(status);
+    }
 
     if (status === 'done' || Number(statusPayload.code) === 0) {
       const credentialPayload = await request<unknown>(tokenPath, {
@@ -530,6 +572,24 @@ export function getBindingName(binding: WeGameBinding): string {
   return binding.nickname || binding.roleId || binding.tgpId || '未命名账号';
 }
 
+export function formatBindingTime(value: string): string {
+  const text = normalizeText(value);
+
+  if (!text) {
+    return '未返回';
+  }
+
+  const date = new Date(text);
+
+  if (Number.isNaN(date.getTime())) {
+    return text;
+  }
+
+  const pad = (num: number) => String(num).padStart(2, '0');
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
 export function buildBindingsText(bindings: WeGameBinding[]): string {
   return bindings
     .map((binding, index) => {
@@ -545,6 +605,7 @@ export function buildBindingsText(bindings: WeGameBinding[]): string {
         `状态：${tags.join(' | ')}`,
         `登录方式：${formatLoginType(binding.loginType)}`,
         `TGP ID：${binding.tgpId || '未返回'}`,
+        `更新时间：${formatBindingTime(binding.updatedAt)}`,
         binding.roleId ? `角色ID：${binding.roleId}` : ''
       ]
         .filter(Boolean)
@@ -553,8 +614,89 @@ export function buildBindingsText(bindings: WeGameBinding[]): string {
     .join('\n\n');
 }
 
+function buildBindingBadges(binding: WeGameBinding): WeGameBindingCardBadge[] {
+  const badges: WeGameBindingCardBadge[] = [];
+
+  if (binding.isPrimary) {
+    badges.push({ text: '主账号', type: 'primary' });
+  }
+
+  badges.push({
+    text: binding.isValid ? '有效' : '失效',
+    type: binding.isValid ? 'valid' : 'invalid'
+  });
+
+  return badges;
+}
+
+export function buildWeGameBindingListCardData(bindings: WeGameBinding[]): WeGameBindingListCardData {
+  if (bindings.length === 0) {
+    return {
+      title: 'WeGame 绑定列表',
+      subtitle: '当前还没有已绑定的 WeGame 账号',
+      bindings: [],
+      emptyText: '暂无已绑定的 WeGame 账号',
+      tip: '请先发送 #wgqq登陆 或 #wgwx登陆 绑定账号',
+      copyright: 'alemonjs-roco · WeGame'
+    };
+  }
+
+  return {
+    title: 'WeGame 绑定列表',
+    subtitle: `当前共 ${bindings.length} 个已绑定账号`,
+    bindings: bindings.map((binding, index) => ({
+      index: index + 1,
+      total: bindings.length,
+      nickname: getBindingName(binding),
+      statusText: `${binding.isPrimary ? '主账号 | ' : ''}${binding.isValid ? '有效' : '失效'}`,
+      loginType: formatLoginType(binding.loginType),
+      tgpId: binding.tgpId || '未返回',
+      updatedAt: formatBindingTime(binding.updatedAt),
+      roleId: binding.roleId || '',
+      isPrimary: binding.isPrimary,
+      badges: buildBindingBadges(binding)
+    })),
+    emptyText: '',
+    tip: '切换：#wg切换账号 <序号>    删除：#wg删除账号 <序号>',
+    copyright: 'alemonjs-roco · WeGame'
+  };
+}
+
 export async function getSavedCredential(userKey: string): Promise<WeGameCredential | null> {
   return (await getUserState(userKey)).lastCredential;
+}
+
+export function buildWeGameLoginSuccessText(binding: WeGameBinding | null, credential: WeGameCredential | null): string {
+  const role = credential?.role ?? null;
+  const lines = ['登录成功。'];
+  const nickname = binding?.nickname ?? role?.name ?? '';
+  const wegameId = binding?.tgpId ?? credential?.tgpId ?? '未返回';
+  const tags: string[] = [];
+
+  if (binding?.isPrimary) {
+    tags.push('主账号');
+  }
+
+  tags.push(binding?.isValid !== false && credential?.isValid !== false ? '有效' : '失效');
+
+  if (nickname) {
+    lines.push(`昵称：${nickname}`);
+  } else {
+    lines.push(`WeGameID：${wegameId}`);
+  }
+
+  lines.push(`状态：${tags.join(' | ')}`);
+  lines.push(`登录方式：${formatLoginType(binding?.loginType ?? credential?.loginType ?? '')}`);
+
+  const roleId = role?.id ?? binding?.roleId ?? '';
+
+  if (roleId) {
+    lines.push(`角色ID：${roleId}`);
+  }
+
+  lines.push('可发送 #wg账号列表 查看已绑定账号。');
+
+  return lines.join('\n');
 }
 
 export async function resolveActiveWeGameCredential(context: WeGameContext): Promise<{

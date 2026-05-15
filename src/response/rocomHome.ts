@@ -1,5 +1,7 @@
-import { buildRocomHomeText, getRocomHome } from '@src/model/rocomExtraQuery';
+import { buildRocomHomeCardData, buildRocomHomeText, getRocomHome } from '@src/model/rocomExtraQuery';
+import RocomHomeCard from '@src/img/views/RocomHomeCard';
 import { Format, useEvent, useMessage } from 'alemonjs';
+import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 export default async () => {
   const [event] = useEvent({
@@ -18,11 +20,26 @@ export default async () => {
 
     const result = await getRocomHome(event);
 
-    md.addText(buildRocomHomeText(result));
+    const img = await renderComponentIsHtmlToBuffer(RocomHomeCard, {
+      data: buildRocomHomeCardData(result.rawPayload, result.uid)
+    });
+
+    if (typeof img === 'boolean') {
+      md.addText(buildRocomHomeText(result));
+      format.addMarkdown(md);
+      void message.send({ format });
+
+      return;
+    }
+
+    format.addImage(img);
   } catch (error) {
     md.addText(`查询家园失败：${error instanceof Error ? error.message : '未知错误'}`);
+    format.addMarkdown(md);
+    void message.send({ format });
+
+    return;
   }
 
-  format.addMarkdown(md);
   void message.send({ format });
 };

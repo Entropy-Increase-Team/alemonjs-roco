@@ -1,6 +1,4 @@
 import fs from 'node:fs';
-import net from 'node:net';
-import { getConfigValue } from 'alemonjs';
 import { getIoRedis } from '@alemonjs/db';
 import { getStoreKeyFormat, type StoreKeyFormat } from '@src/constants/storeKeys';
 import YAML from 'yaml';
@@ -9,8 +7,6 @@ const runtimeStoreRoot = '.data/runtime-store';
 const fallbackDir = runtimeStoreRoot;
 let redisDisabledReason = '';
 let redisFailureLogged = false;
-let redisProbeResolved = false;
-let redisProbeAvailable = false;
 
 function getRuntimeStoreFilePath(fileName: string): string {
   return `${runtimeStoreRoot}/${fileName}`;
@@ -41,63 +37,18 @@ function disableRedis(reason: unknown): void {
   }
 }
 
-function getRedisEndpoint(): { host: string; port: number } | null {
-  const config = getConfigValue<Record<string, unknown>>();
-  const redis = (config.redis as Record<string, unknown> | undefined) ?? {};
-  const host = normalizeText(redis.host);
-  const port = Number(redis.port);
-
-  if (!host || !Number.isFinite(port) || port <= 0) {
-    return null;
-  }
-
-  return { host, port };
-}
-
-async function probeRedisConnection(): Promise<boolean> {
+function probeRedisConnection(): boolean {
   if (process.env.ALEMONJS_RUNTIME_STORE_DRIVER === 'file') {
     disableRedis('环境变量指定 file 模式');
 
     return false;
   }
 
-  if (redisProbeResolved) {
-    return redisProbeAvailable;
-  }
-
-  redisProbeResolved = true;
-  const endpoint = getRedisEndpoint();
-
-  if (!endpoint) {
-    disableRedis('未配置 redis 连接');
-    redisProbeAvailable = false;
-
+  if (redisDisabledReason) {
     return false;
   }
 
-  redisProbeAvailable = await new Promise<boolean>(resolve => {
-    const socket = net.createConnection({
-      host: endpoint.host,
-      port: endpoint.port
-    });
-
-    const finalize = (value: boolean) => {
-      socket.removeAllListeners();
-      socket.destroy();
-      resolve(value);
-    };
-
-    socket.setTimeout(300);
-    socket.once('connect', () => finalize(true));
-    socket.once('timeout', () => finalize(false));
-    socket.once('error', () => finalize(false));
-  });
-
-  if (!redisProbeAvailable) {
-    disableRedis(`${endpoint.host}:${endpoint.port} 不可连接`);
-  }
-
-  return redisProbeAvailable;
+  return true;
 }
 
 function inferStoreFormat(key: string, fileName: string): StoreKeyFormat {
@@ -154,7 +105,7 @@ async function getRedisValue(key: string): Promise<string | null> {
     return null;
   }
 
-  if (!(await probeRedisConnection())) {
+  if (!probeRedisConnection()) {
     return null;
   }
 
@@ -174,7 +125,7 @@ async function setRedisValue(key: string, value: string): Promise<boolean> {
     return false;
   }
 
-  if (!(await probeRedisConnection())) {
+  if (!probeRedisConnection()) {
     return false;
   }
 

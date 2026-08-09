@@ -1,6 +1,8 @@
 # 阿柠檬-洛克王国世界
 
-可通过以下2种方式部署运行环境
+可通过以下方式部署运行环境
+
+`alemonx` https://github.com/lemonade-lab/alemonx/releases
 
 `alemongo` https://github.com/lemonade-lab/alemongo
 

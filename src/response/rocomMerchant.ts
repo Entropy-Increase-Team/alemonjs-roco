@@ -1,10 +1,13 @@
-import RocomMerchantCard from '@src/img/views/RocomMerchantCard';
-import { buildRocomMerchantCardData, buildRocomMerchantText } from '@src/model/rocomMerchant';
-import { getRocomMerchantInfo } from '@src/model/rocomExtraQuery';
-import { Format, useMessage } from 'alemonjs';
+import RocomMerchantRoundCard from '@src/img/views/RocomMerchantRoundCard';
+import { buildRocomMerchantRoundCardData, fetchRocomMerchantMergedInfo } from '@src/model/rocomMerchantRealtime';
+import { getWeGameUserContext } from '@src/model/wegameAccount';
+import { Format, useEvent, useMessage } from 'alemonjs';
 import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 export default async () => {
+  const [event] = useEvent({
+    selects: ['private.message.create', 'message.create', 'interaction.create', 'private.interaction.create']
+  });
   const [message] = useMessage();
   const statusFormat = Format.create();
   const statusMarkdown = Format.createMarkdown();
@@ -16,13 +19,14 @@ export default async () => {
     statusFormat.addMarkdown(statusMarkdown);
     void message.send({ format: statusFormat });
 
-    const result = await getRocomMerchantInfo();
-    const img = await renderComponentIsHtmlToBuffer(RocomMerchantCard, {
-      data: buildRocomMerchantCardData(result)
+    const context = getWeGameUserContext(event);
+    const payload = await fetchRocomMerchantMergedInfo(context.userIdentifier);
+    const img = await renderComponentIsHtmlToBuffer(RocomMerchantRoundCard, {
+      data: buildRocomMerchantRoundCardData(payload)
     });
 
     if (typeof img === 'boolean') {
-      md.addText(buildRocomMerchantText(result));
+      md.addText('远行商人图片加载失败，请稍后重试');
       format.addMarkdown(md);
       void message.send({ format });
 

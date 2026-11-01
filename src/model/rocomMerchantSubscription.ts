@@ -1,14 +1,24 @@
+/*
+ * 说明：后端 payload 字段大量为 unknown，字符串兜底链刻意使用 ||（空字符串同样视为缺失），
+ * 因此关闭 prefer-nullish-coalescing 检查。
+ */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { storeKeys } from '@src/constants/storeKeys';
-import { extractMerchantProducts, fetchRocomMerchantInfo, getCurrentMerchantRound } from '@src/model/rocomMerchant';
+import RocomMerchantRoundCard from '@src/img/views/RocomMerchantRoundCard';
+import { getCurrentMerchantRound } from '@src/model/rocomMerchant';
+import { buildRocomMerchantRoundCardData, fetchRocomMerchantMergedInfo } from '@src/model/rocomMerchantRealtime';
+import { describeMerchantItems, getMerchantCatalog, resolveMerchantSelection } from '@src/model/rocomMerchantCatalog';
 import { readRuntimeStore, writeRuntimeStore } from '@src/model/runtimeStore';
 import { readRocomConfig } from '@src/model/wegameResource';
 import { Format, MessageDirect } from 'alemonjs';
+import { renderComponentIsHtmlToBuffer } from 'jsxp';
 
 type MerchantSubscription = {
   key: string;
   group_id: string;
   bot_id: string;
   mention_all: boolean;
+  mode: 'all' | 'items';
   items: string[];
   last_push_round: string;
   last_matched_items: string[];
@@ -54,34 +64,25 @@ async function getDefaultMerchantItems(): Promise<string[]> {
   return values.length > 0 ? values : ['国王球', '棱镜球', '炫彩精灵蛋'];
 }
 
-function splitMerchantSubscriptionItems(rawText = ''): string[] {
-  return normalizeItems(String(rawText || '').split(/[\s,，、/|；;]+/u));
-}
-
-export function parseMerchantSubscriptionArgs(rawText = ''): { mentionAll: boolean; customItems: string[] | null } {
+export function parseMerchantSubscriptionArgs(rawText = ''): { mentionAll: boolean | null; tokens: string[] } {
   const text = normalizeText(rawText);
 
   if (!text) {
-    return {
-      mentionAll: false,
-      customItems: null
-    };
+    return { mentionAll: null, tokens: [] };
   }
 
-  const tokens = text.split(/\s+/, 2);
-  let mentionAll = false;
-  let itemsText = text;
+  const tokens = text.split(/\s+/u);
+  let mentionAll: boolean | null = null;
+  let rest = tokens;
 
-  if (tokens[0] === '0' || tokens[0] === '1') {
-    mentionAll = tokens[0] === '1';
-    itemsText = text.slice(tokens[0].length).trim();
+  if (rest[0] === '0' || rest[0] === '1') {
+    mentionAll = rest[0] === '1';
+    rest = rest.slice(1);
   }
-
-  const customItems = splitMerchantSubscriptionItems(itemsText);
 
   return {
     mentionAll,
-    customItems: customItems.length > 0 ? customItems : null
+    tokens: rest.filter(Boolean)
   };
 }
 
@@ -98,6 +99,7 @@ function normalizeSubscription(key = '', payload: Record<string, unknown> = {}):
     group_id: normalizeText(payload.group_id ?? payload.groupId),
     bot_id: normalizeText(payload.bot_id ?? payload.botId),
     mention_all: payload.mention_all === true || payload.mentionAll === true,
+    mode: payload.mode === 'all' ? 'all' : 'items',
     items: normalizeItems(payload.items),
     last_push_round: normalizeText(payload.last_push_round ?? payload.lastPushRound),
     last_matched_items: normalizeItems(payload.last_matched_items ?? payload.lastMatchedItems),
@@ -171,29 +173,82 @@ export function buildMerchantSubscriptionKey(botId: string, groupId: string): st
 export async function subscribeRocomMerchant(event: { current: Record<string, unknown> }, rawArgs = ''): Promise<string> {
   const scope = resolveMerchantScope(event);
   const parsed = parseMerchantSubscriptionArgs(rawArgs);
-  const selectedItems = parsed.customItems ?? (await getDefaultMerchantItems());
   const key = buildMerchantSubscriptionKey(scope.botId, scope.groupId);
-  const all = await readAllSubscriptions();
+  const previous = (await getAllMerchantSubscriptions())[key];
+  const catalog = await getMerchantCatalog();
+  const resolved = resolveMerchantSelection(parsed.tokens, catalog);
+  const wantAll = resolved.all;
+  const hasInput = resolved.all || parsed.tokens.length > 0;
 
-  all[key] = normalizeSubscription(key, {
-    ...all[key],
+  if (hasInput && !wantAll && resolved.names.length === 0) {
+    return [`没有识别到可订阅的商品：${resolved.unknownIndexes.join('、') || parsed.tokens.join('、')}`, '先用 +商人商品 查看商品序号，再按序号订阅。'].join(
+      '\n'
+    );
+  }
+
+  let mode: MerchantSubscription['mode'] = 'items';
+  let selectedItems: string[] = [];
+  let sourceHint = '';
+
+  if (wantAll) {
+    mode = 'all';
+    sourceHint = '全物品订阅';
+  } else if (resolved.names.length > 0) {
+    mode = 'items';
+    selectedItems = resolved.names;
+    sourceHint = '本次指定';
+  } else if (previous && (previous.mode === 'all' || previous.items.length > 0)) {
+    mode = previous.mode;
+    selectedItems = previous.items;
+    sourceHint = '沿用上次配置';
+  } else {
+    mode = 'items';
+    selectedItems = await getDefaultMerchantItems();
+    sourceHint = '默认商品配置';
+  }
+
+  const mentionAll = parsed.mentionAll === null ? previous?.mention_all === true : parsed.mentionAll;
+
+  await upsertMerchantSubscription(key, {
+    ...previous,
     group_id: scope.groupId,
     bot_id: scope.botId,
-    mention_all: parsed.mentionAll,
+    mention_all: mentionAll,
+    mode,
     items: selectedItems,
     updated_by: scope.userId,
     updated_at: new Date().toISOString()
   });
-  await writeAllSubscriptions(all);
 
-  const sourceHint = parsed.customItems ? '本群自定义商品' : '默认商品配置';
+  const lines: string[] = [];
 
-  return [
-    '已订阅远行商人。',
-    `监听商品：${selectedItems.join('、')}（${sourceHint}）`,
-    parsed.mentionAll ? '命中后会尝试 @全体。' : '命中后不会 @全体。',
-    '可用格式：+订阅远行商人 1 国王球 棱镜球 / +取消订阅远行商人'
-  ].join('\n');
+  if (mode === 'all') {
+    lines.push('已订阅远行商人（本群）：全物品订阅，每轮只要有商品上架就推送。');
+  } else {
+    lines.push(`已订阅远行商人（本群）：共监听 ${selectedItems.length} 件商品。`);
+    lines.push(`监听商品：${describeMerchantItems(selectedItems, catalog)}`);
+  }
+
+  lines.push(`商品来源：${sourceHint}。`);
+  lines.push(mentionAll ? '命中后会尝试 @全体。' : '命中后不会 @全体。');
+
+  if (resolved.unknownIndexes.length > 0) {
+    lines.push(`未找到的序号：${resolved.unknownIndexes.join('、')}（已忽略）。`);
+  }
+
+  if (resolved.unrecognizedNames.length > 0) {
+    lines.push(`商品目录里没有：${resolved.unrecognizedNames.join('、')}（已按原名订阅）。`);
+  }
+
+  lines.push('');
+  lines.push('可用格式：');
+  lines.push('+订阅远行商人 1 3 国王球  按序号或名称订阅商品');
+  lines.push('+订阅远行商人 全部  订阅全物品，任意商品上架都推送');
+  lines.push('+订阅远行商人 @全体 1 3  命中后尝试 @全体');
+  lines.push('+商人商品  查看商品序号');
+  lines.push('+取消订阅远行商人  取消订阅');
+
+  return lines.join('\n');
 }
 
 export async function unsubscribeRocomMerchant(event: { current: Record<string, unknown> }): Promise<string> {
@@ -215,7 +270,8 @@ export async function unsubscribeRocomMerchant(event: { current: Record<string, 
 async function sendMerchantSubscriptionMessage(
   subscription: MerchantSubscription,
   matchedItems: string[],
-  roundInfo: { current: number | null; total: number; countdown: string }
+  roundInfo: { current: number | null; total: number; countdown: string },
+  image: Buffer | null
 ) {
   const format = Format.create();
   const md = Format.createMarkdown();
@@ -225,12 +281,16 @@ async function sendMerchantSubscriptionMessage(
     md.addNewline();
   }
 
-  md.addText(`远行商人本轮命中订阅商品：${matchedItems.join('、')}`);
+  md.addText(subscription.mode === 'all' ? `远行商人本轮上新：${matchedItems.join('、')}` : `远行商人本轮命中订阅商品：${matchedItems.join('、')}`);
   md.addNewline();
   md.addText(`轮次：第 ${roundInfo.current ?? '未开放'} / ${roundInfo.total} 轮`);
   md.addNewline();
   md.addText(`剩余：${roundInfo.countdown}`);
   format.addMarkdown(md);
+
+  if (image) {
+    format.addImage(image);
+  }
 
   await MessageDirect.create().sendToChannel({
     SpaceId: subscription.group_id,
@@ -246,30 +306,50 @@ export async function checkRocomMerchantSubscriptions(): Promise<void> {
     return;
   }
 
-  const payload = await fetchRocomMerchantInfo(true);
-  const { products } = extractMerchantProducts(payload);
+  const requestOwner = normalizeText(entries.find(([, item]) => normalizeText(item?.updated_by))?.[1]?.updated_by);
+  const payload = await fetchRocomMerchantMergedInfo(requestOwner);
   const roundInfo = getCurrentMerchantRound();
+  const goods = buildRocomMerchantRoundCardData(payload);
+  const productNameSet = new Set(goods.goods.map(item => normalizeText(item.goodsName)).filter(Boolean));
 
-  if (!roundInfo.isOpen || products.length === 0) {
+  if (!roundInfo.isOpen || productNameSet.size === 0) {
     return;
   }
 
-  const productNameSet = new Set(products.map(item => normalizeText(item.name)).filter(Boolean));
+  let image: Buffer | null = null;
+
+  try {
+    const rendered = await renderComponentIsHtmlToBuffer(RocomMerchantRoundCard, { data: goods });
+
+    if (typeof rendered !== 'boolean') {
+      image = rendered;
+    }
+  } catch (error) {
+    logger.warn(`[rocom] 远行商人订阅图片渲染失败：${error instanceof Error ? error.message : error}`);
+  }
 
   for (const [key, subscription] of entries) {
-    const configuredItems = subscription.items.length > 0 ? subscription.items : await getDefaultMerchantItems();
-    const matchedItems = configuredItems.filter(item => productNameSet.has(normalizeText(item)));
-
-    if (matchedItems.length === 0) {
-      continue;
-    }
-
     if (normalizeText(subscription.last_push_round) === roundInfo.roundId) {
       continue;
     }
 
+    const subscriptionMode = subscription.mode === 'all' ? 'all' : 'items';
+    let matchedItems: string[] = [];
+
+    if (subscriptionMode === 'all') {
+      matchedItems = [...productNameSet];
+    } else {
+      const configuredItems = subscription.items.length > 0 ? subscription.items : await getDefaultMerchantItems();
+
+      matchedItems = configuredItems.filter(item => productNameSet.has(normalizeText(item)));
+
+      if (matchedItems.length === 0) {
+        continue;
+      }
+    }
+
     try {
-      await sendMerchantSubscriptionMessage(subscription, matchedItems, roundInfo);
+      await sendMerchantSubscriptionMessage(subscription, matchedItems, roundInfo, image);
       await upsertMerchantSubscription(key, {
         ...subscription,
         last_push_round: roundInfo.roundId,

@@ -400,6 +400,75 @@ export function requestWeGame<T>(
   return request<T>(urlPath, options);
 }
 
+/**
+ * 完整响应信封请求：不剥离 code/message/data 之外的兄弟字段。
+ * 用于实时远行商人接口（goods_mapping 挂在信封顶层）等场景。
+ */
+export async function requestWeGameEnvelope(
+  urlPath: string,
+  options: {
+    method?: string;
+    params?: Record<string, string>;
+    data?: Record<string, unknown>;
+    headers?: Record<string, string>;
+    timeout?: number;
+  } = {}
+): Promise<Record<string, unknown>> {
+  const config = await readWeGameConfig();
+
+  if (!config.base_url) {
+    throw createRequestError('缺少 WeGame 后端地址，请写入 WeGame 运行配置 wegame.base_url，或设置环境变量 WEGAME_BASE_URL');
+  }
+
+  const url = new URL(`${config.base_url}${urlPath}`);
+  const params = {
+    device_fingerprint: getDeviceFingerprint(config),
+    ...(options.params ?? {})
+  };
+
+  for (const [key, value] of Object.entries(params)) {
+    if (normalizeText(value)) {
+      url.searchParams.set(key, value);
+    }
+  }
+
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'X-Device-Fingerprint': getDeviceFingerprint(config),
+    'X-Device-Id': getDeviceFingerprint(config),
+    ...(options.headers ?? {})
+  };
+
+  if (config.api_key) {
+    headers['X-API-Key'] = config.api_key;
+  }
+
+  const method = normalizeText(options.method).toLowerCase() === 'post' ? 'POST' : 'GET';
+  const response = await requestJson<Record<string, unknown>>({
+    url: String(url),
+    method,
+    headers: method === 'POST' ? { 'Content-Type': 'application/json', ...headers } : headers,
+    data: options.data ? { device_fingerprint: getDeviceFingerprint(config), ...options.data } : undefined,
+    timeout: options.timeout && options.timeout > 0 ? options.timeout : config.request_timeout_ms
+  });
+
+  const body = response.data ?? null;
+
+  if (!isHttpOk(response.status)) {
+    throw createRequestError((body?.message as string) ?? `请求失败：HTTP ${response.status}`);
+  }
+
+  if (!body || typeof body !== 'object') {
+    throw createRequestError('接口返回为空');
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, 'code') && Number(body.code) !== 0) {
+    throw createRequestError((body.message as string) ?? `请求失败：业务码 ${body.code ?? 'unknown'}`);
+  }
+
+  return body;
+}
+
 export async function createWeGameLogin(userIdentifier: string, platform: 'qq' | 'wechat') {
   const config = await readWeGameConfig();
 

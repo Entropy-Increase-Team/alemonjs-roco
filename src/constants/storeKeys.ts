@@ -26,6 +26,11 @@ export const storeKeys = {
     users: buildDataStoreKey('json', 'wegame', 'users')
   },
   rocom: {
-    merchantSubscriptions: buildDataStoreKey('json', 'rocom', 'merchant-subscriptions')
+    merchantSubscriptions: buildDataStoreKey('json', 'rocom', 'merchant-subscriptions'),
+    merchantCatalog: buildDataStoreKey('json', 'rocom', 'merchant-catalog'),
+    merchantPriceLog: buildDataStoreKey('json', 'rocom', 'merchant-price-log'),
+    eggSubscriptions: buildDataStoreKey('json', 'rocom', 'egg-subscriptions'),
+    eggExchangeSubscriptions: buildDataStoreKey('json', 'rocom', 'egg-exchange-subscriptions'),
+    bindUid: buildDataStoreKey('json', 'rocom', 'bind-uid')
   }
 } as const;

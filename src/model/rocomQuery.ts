@@ -647,7 +647,7 @@ export async function searchRocomPlayer(context: WeGameContext, rawArgs = '') {
   let uid = extractUidArgument(rawArgs);
 
   if (!uid) {
-    const data = await getRocomAccounts(event);
+    const data = await getRocomAccounts(context);
 
     uid = normalizeText(data.accounts.find(item => item.isPrimary)?.roleId ?? data.accounts[0]?.roleId);
   }

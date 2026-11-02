@@ -1,6 +1,6 @@
 {
   "name": "alemonjs-roco",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "mhy-mod",
   "author": "ningmengchongshui",
   "type": "module",
@@ -8,6 +8,17 @@
   "exports": {
     ".": "./lib/index.js",
     "./package": "./package.json"
+  },
+  "scripts": {
+    "app": "node index.js",
+    "dev": "npx lvy app.ts",
+    "view": "npx lvy app.ts --jsxp",
+    "test:expose": "yarn build && node --test test/expose*.test.mjs",
+    "lint": "eslint src --ext .ts,.tsx,.js --max-warnings=0",
+    "lint:fix": "eslint src --ext .ts,.tsx,.js --fix --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "precommit": "lint-staged"
   },
   "dependencies": {
     "@types/qrcode": "^1.5.6",
@@ -28,7 +39,6 @@
       "prettier --write"
     ]
   },
-  "packageManager": "yarn@1.22.22",
   "keywords": [
     "alemonjs"
   ],
@@ -40,5 +50,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/xiuxianjs/alemonjs-roco.git"
-  }
+  },
+  "gitHead": "18eb540091bb10cb4456fb0aefa0030b7651820d"
 }

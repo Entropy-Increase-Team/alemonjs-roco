@@ -11,5 +11,10 @@ export declare const storeKeys: {
     };
     readonly rocom: {
         readonly merchantSubscriptions: string;
+        readonly merchantCatalog: string;
+        readonly merchantPriceLog: string;
+        readonly eggSubscriptions: string;
+        readonly eggExchangeSubscriptions: string;
+        readonly bindUid: string;
     };
 };

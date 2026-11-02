@@ -11,6 +11,6 @@ type ConfigSection = {
     values: Record<string, unknown>;
 };
 export declare function getWeGameConfigRegistry(): ConfigSection[];
-export declare function buildWeGameConfigSummary(code?: string): Promise<string>;
+export declare function buildWeGameConfigSummary(code?: string, redactSensitive?: boolean): Promise<string>;
 export declare function buildWeGameConfigRegistryText(): string;
 export {};

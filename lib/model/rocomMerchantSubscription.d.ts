@@ -3,6 +3,7 @@ type MerchantSubscription = {
     group_id: string;
     bot_id: string;
     mention_all: boolean;
+    mode: 'all' | 'items';
     items: string[];
     last_push_round: string;
     last_matched_items: string[];
@@ -10,13 +11,26 @@ type MerchantSubscription = {
     updated_at: string;
 };
 export declare function parseMerchantSubscriptionArgs(rawText?: string): {
-    mentionAll: boolean;
-    customItems: string[] | null;
+    mentionAll: boolean | null;
+    tokens: string[];
 };
 export declare function getMerchantSubscriptionCron(): Promise<string>;
 export declare function getAllMerchantSubscriptions(): Promise<Record<string, MerchantSubscription>>;
 export declare function upsertMerchantSubscription(key: string, payload: Record<string, unknown>): Promise<MerchantSubscription>;
 export declare function buildMerchantSubscriptionKey(botId: string, groupId: string): string;
+export type MerchantSubscribeResult = {
+    status: 'success' | 'partial' | 'rejected';
+    text: string;
+    items: string[];
+    unknownIndexes: string[];
+    mode: 'items' | 'all';
+};
+export declare function subscribeRocomMerchantResult(event: {
+    current: Record<string, unknown>;
+}, rawArgs?: string, selection?: {
+    mentionAll: boolean | null;
+    tokens: string[];
+}): Promise<MerchantSubscribeResult>;
 export declare function subscribeRocomMerchant(event: {
     current: Record<string, unknown>;
 }, rawArgs?: string): Promise<string>;

@@ -86,13 +86,21 @@ export declare function requestWeGame<T>(urlPath: string, options?: {
     data?: Record<string, unknown>;
     headers?: Record<string, string>;
 }): Promise<T>;
-export declare function createWeGameLogin(userIdentifier: string, platform: 'qq' | 'wechat'): Promise<{
+export declare function requestWeGameEnvelope(urlPath: string, options?: {
+    method?: string;
+    params?: Record<string, string>;
+    data?: Record<string, unknown>;
+    headers?: Record<string, string>;
+    timeout?: number;
+}): Promise<Record<string, unknown>>;
+export declare function createWeGameLogin(userIdentifier: string, platform: 'qq' | 'wechat', signal?: AbortSignal): Promise<{
     frameworkToken?: string;
     qr_image?: string;
     expire?: string | number;
 }>;
 export declare function waitWeGameLogin(userIdentifier: string, userKey: string, platform: 'qq' | 'wechat', frameworkToken: string, options?: {
     onStatusChange?: (status: string) => void | Promise<void>;
+    signal?: AbortSignal;
 }): Promise<WeGameCredential>;
 export declare function getWeGameBindings(userIdentifier: string): Promise<WeGameBinding[]>;
 export declare function pickActiveBinding(bindings: WeGameBinding[]): WeGameBinding | null;

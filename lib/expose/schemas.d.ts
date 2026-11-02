@@ -1,0 +1,45 @@
+import type { Pet } from '../model/types';
+export declare const skillSchema: import("alemonjs").ExposeValueSchema;
+export declare const petSchema: import("alemonjs").ExposeValueSchema;
+export declare function projectPet(pet: Pet): {
+    id: number;
+    name: string;
+    avatar: string;
+    elements: string[];
+    hp: number;
+    atk: number;
+    mat: number;
+    def: number;
+    mdf: number;
+    spd: number;
+    trait: import("../model/types").PetTrait;
+    skills: import("../model/types").PetSkill[];
+};
+export declare const homePetsSchema: import("alemonjs").ExposeValueSchema;
+export declare const homeDetailPetSchema: import("alemonjs").ExposeValueSchema;
+export declare const homeDetailSchema: import("alemonjs").ExposeValueSchema;
+export declare const teamSchema: import("alemonjs").ExposeValueSchema;
+export declare const merchantTodaySchema: import("alemonjs").ExposeValueSchema;
+export declare const catalogSchema: import("alemonjs").ExposeValueSchema;
+export declare const announcementSchema: import("alemonjs").ExposeValueSchema;
+export declare const announcementDetailSchema: import("alemonjs").ExposeValueSchema;
+export declare const eggPostSchema: import("alemonjs").ExposeValueSchema;
+export declare function projectPost(item: Record<string, unknown>): {
+    id: string;
+    have: string;
+    want: string;
+    note: string;
+    remark: string;
+    status: string;
+    reviewStatus: string;
+    createdAt: string;
+};
+export declare const eggFiltersSchema: import("alemonjs").ExposeValueSchema;
+export declare function projectFilters(value: unknown): {
+    want_text: string;
+    have_text: string;
+    want_note: string;
+    id: string;
+    q: string;
+};
+export declare const homeSubscriptionSchema: import("alemonjs").ExposeValueSchema;

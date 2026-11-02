@@ -52,7 +52,7 @@
     "husky": "^9.1.7",
     "jsxp": "^1.4.0",
     "lint-staged": "^16.1.5",
-    "lvyjs": "^0.3.0-alpha.5",
+    "lvyjs": "^0.4.0",
     "prettier": "^3.5.3",
     "sass": "^1.83.0",
     "tailwindcss": "^3",

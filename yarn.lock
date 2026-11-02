@@ -3728,14 +3728,17 @@ lvyjs-plugin-postcss@^0.2.0:
     postcss-load-config "^6.0.1"
     tsx "^4.23.12"
 
-lvyjs@^0.3.0-alpha.5:
-  version "0.3.1"
-  resolved "https://registry.npmmirror.com/lvyjs/-/lvyjs-0.3.1.tgz#d1d9dd50f07f7cf3383b91de1c24520db14f748c"
-  integrity sha512-HE+x5ytmY/0/80pflhM1XanNU49MxCvGL3qDcLyHOZRQJWMwh/v++P7b4gN1p6dIknZ1ty9WLo4BETRT+WHR6A==
+lvyjs@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.npmmirror.com/lvyjs/-/lvyjs-0.4.0.tgz#4259491a31faad3d135e8a81dc01260a3e7b6231"
+  integrity sha512-ujkrTj353R8rcUifhAnqMgInPN/IYRwqNGHU4VmJUFjROt4TTaNCsw7isPiV/HrQezte5/2kCkEqx8SFhrP9/g==
   dependencies:
     "@jridgewell/remapping" "^2.3.5"
     chokidar "^5.0.0"
     esbuild "~0.28.0"
+    picomatch "^4.0.3"
+    postcss "^8.4.47"
+    postcss-value-parser "^4.2.0"
     tsdown "^0.22.14"
     tsx "^4.23.12"
     typescript "^7.0.2"

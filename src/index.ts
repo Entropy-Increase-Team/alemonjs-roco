@@ -1,3 +1,4 @@
+import { rocoExpose } from './expose';
 import { setCron } from 'alemonjs';
 import { checkRocomEggSubscriptions, getEggSubscriptionCron } from './model/rocomEggSubscription';
 import { checkRocomMerchantSubscriptions, getMerchantSubscriptionCron } from './model/rocomMerchantSubscription';
@@ -6,7 +7,8 @@ import router from './router';
 export default defineChildren({
   register() {
     return {
-      responseRouter: router
+      responseRouter: router,
+      expose: rocoExpose
     };
   },
   onCreated() {

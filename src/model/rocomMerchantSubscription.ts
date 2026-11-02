@@ -170,9 +170,21 @@ export function buildMerchantSubscriptionKey(botId: string, groupId: string): st
   return `${normalizedBotId}:${normalizedGroupId}`;
 }
 
-export async function subscribeRocomMerchant(event: { current: Record<string, unknown> }, rawArgs = ''): Promise<string> {
+export type MerchantSubscribeResult = {
+  status: 'success' | 'partial' | 'rejected';
+  text: string;
+  items: string[];
+  unknownIndexes: string[];
+  mode: 'items' | 'all';
+};
+
+export async function subscribeRocomMerchantResult(
+  event: { current: Record<string, unknown> },
+  rawArgs = '',
+  selection?: { mentionAll: boolean | null; tokens: string[] }
+): Promise<MerchantSubscribeResult> {
   const scope = resolveMerchantScope(event);
-  const parsed = parseMerchantSubscriptionArgs(rawArgs);
+  const parsed = selection ?? parseMerchantSubscriptionArgs(rawArgs);
   const key = buildMerchantSubscriptionKey(scope.botId, scope.groupId);
   const previous = (await getAllMerchantSubscriptions())[key];
   const catalog = await getMerchantCatalog();
@@ -181,9 +193,15 @@ export async function subscribeRocomMerchant(event: { current: Record<string, un
   const hasInput = resolved.all || parsed.tokens.length > 0;
 
   if (hasInput && !wantAll && resolved.names.length === 0) {
-    return [`没有识别到可订阅的商品：${resolved.unknownIndexes.join('、') || parsed.tokens.join('、')}`, '先用 +商人商品 查看商品序号，再按序号订阅。'].join(
-      '\n'
-    );
+    return {
+      status: 'rejected',
+      text: [`没有识别到可订阅的商品：${resolved.unknownIndexes.join('、') || parsed.tokens.join('、')}`, '先用 +商人商品 查看商品序号，再按序号订阅。'].join(
+        '\n'
+      ),
+      items: [],
+      unknownIndexes: resolved.unknownIndexes,
+      mode: 'items'
+    };
   }
 
   let mode: MerchantSubscription['mode'] = 'items';
@@ -248,7 +266,17 @@ export async function subscribeRocomMerchant(event: { current: Record<string, un
   lines.push('+商人商品  查看商品序号');
   lines.push('+取消订阅远行商人  取消订阅');
 
-  return lines.join('\n');
+  return {
+    status: resolved.unknownIndexes.length ? 'partial' : 'success',
+    text: lines.join('\n'),
+    items: selectedItems,
+    unknownIndexes: resolved.unknownIndexes,
+    mode
+  };
+}
+
+export async function subscribeRocomMerchant(event: { current: Record<string, unknown> }, rawArgs = ''): Promise<string> {
+  return (await subscribeRocomMerchantResult(event, rawArgs)).text;
 }
 
 export async function unsubscribeRocomMerchant(event: { current: Record<string, unknown> }): Promise<string> {

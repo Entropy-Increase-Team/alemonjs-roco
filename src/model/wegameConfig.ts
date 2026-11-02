@@ -168,7 +168,7 @@ export function getWeGameConfigRegistry(): ConfigSection[] {
   ];
 }
 
-export async function buildWeGameConfigSummary(code?: string): Promise<string> {
+export async function buildWeGameConfigSummary(code?: string, redactSensitive = false): Promise<string> {
   const sections = getWeGameConfigRegistry();
 
   sections[0] = await getCoreWeGameConfig();
@@ -186,7 +186,9 @@ export async function buildWeGameConfigSummary(code?: string): Promise<string> {
       const lines = [`${section.title}`, `来源：${section.source}`];
 
       for (const field of section.fields) {
-        lines.push(`- ${field.label}：${formatValue(getValueByPath(section.values, field.field))}`);
+        const sensitive = ['wegame.api_key', 'wegame.device_fingerprint', 'wegame.client_id'].includes(field.field);
+
+        lines.push(`- ${field.label}：${redactSensitive && sensitive ? '[已隐藏]' : formatValue(getValueByPath(section.values, field.field))}`);
       }
 
       return lines.join('\n');

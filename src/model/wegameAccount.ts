@@ -1,3 +1,4 @@
+import { setTimeout as delay } from 'node:timers/promises';
 import { storeKeys } from '@src/constants/storeKeys';
 import { isHttpOk, requestJson } from '@src/model/http';
 import crypto from 'node:crypto';
@@ -249,6 +250,7 @@ async function request<T>(
     params?: Record<string, string>;
     data?: Record<string, unknown>;
     headers?: Record<string, string>;
+    signal?: AbortSignal;
   } = {}
 ): Promise<T> {
   const config = await readWeGameConfig();
@@ -285,7 +287,8 @@ async function request<T>(
     method: options.method ?? 'GET',
     headers,
     data: options.data ? { device_fingerprint: getDeviceFingerprint(config), ...options.data } : undefined,
-    timeout: config.request_timeout_ms
+    timeout: config.request_timeout_ms,
+    signal: options.signal
   });
 
   const body = response.data ?? null;
@@ -469,7 +472,7 @@ export async function requestWeGameEnvelope(
   return body;
 }
 
-export async function createWeGameLogin(userIdentifier: string, platform: 'qq' | 'wechat') {
+export async function createWeGameLogin(userIdentifier: string, platform: 'qq' | 'wechat', signal?: AbortSignal) {
   const config = await readWeGameConfig();
 
   if (!config.api_key) {
@@ -480,6 +483,7 @@ export async function createWeGameLogin(userIdentifier: string, platform: 'qq' |
 
   return request<{ frameworkToken?: string; qr_image?: string; expire?: string | number }>(pathName, {
     method: 'GET',
+    signal,
     headers: getUserScopedHeaders(userIdentifier),
     params: {
       user_identifier: userIdentifier,
@@ -495,6 +499,7 @@ export async function waitWeGameLogin(
   frameworkToken: string,
   options: {
     onStatusChange?: (status: string) => void | Promise<void>;
+    signal?: AbortSignal;
   } = {}
 ) {
   const config = await readWeGameConfig();
@@ -504,8 +509,10 @@ export async function waitWeGameLogin(
   let lastStatus = '';
 
   while (Date.now() - startedAt < config.login_timeout_ms) {
+    options.signal?.throwIfAborted();
     const statusPayload = await request<{ status?: string; code?: number }>(statusPath, {
       method: 'GET',
+      signal: options.signal,
       headers: {
         'X-Framework-Token': frameworkToken,
         ...getUserScopedHeaders(userIdentifier)
@@ -527,6 +534,7 @@ export async function waitWeGameLogin(
     if (status === 'done' || Number(statusPayload.code) === 0) {
       const credentialPayload = await request<unknown>(tokenPath, {
         method: 'GET',
+        signal: options.signal,
         headers: {
           'X-Framework-Token': frameworkToken,
           ...getUserScopedHeaders(userIdentifier)
@@ -543,6 +551,7 @@ export async function waitWeGameLogin(
         throw new Error('登录成功，但凭证数据不完整');
       }
 
+      options.signal?.throwIfAborted();
       await setUserState(userKey, { lastCredential: credential });
 
       return credential;
@@ -552,7 +561,7 @@ export async function waitWeGameLogin(
       throw new Error('二维码已过期，请重新发送登录指令');
     }
 
-    await new Promise(resolve => setTimeout(resolve, config.login_poll_interval_ms));
+    await delay(config.login_poll_interval_ms, undefined, { signal: options.signal });
   }
 
   throw new Error('等待扫码结果超时，请重新发送登录指令');

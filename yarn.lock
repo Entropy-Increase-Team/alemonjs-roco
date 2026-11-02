@@ -2,48 +2,48 @@
 # yarn lockfile v1
 
 
-"@alemonjs/bubble@^2.1.11":
-  version "2.1.11"
-  resolved "https://registry.npmmirror.com/@alemonjs/bubble/-/bubble-2.1.11.tgz#529d3396b34900fafe9dbe9b74c1dbf2ef538ff0"
-  integrity sha512-EyZNTjpNxFsHM4IMP4r0ofNX6mIF5rUf9R8iOyMH21kKjDODAAs43Mrmt5prR3FiRisHeeY0WFrl3t7lzSqJ3Q==
+"@alemonjs/bubble@^2.1.15":
+  version "2.1.15"
+  resolved "https://registry.npmmirror.com/@alemonjs/bubble/-/bubble-2.1.15.tgz#5e514499021460b18a8917691aa12d9af6bc132c"
+  integrity sha512-c8NXsPbBKNJuxUYiGPkP2jeI+2XNSu0LyZLYIueVed9XMVu84HgqrOzUbKFJjojZI4ClAMPd+b453bmqVufWWw==
   dependencies:
     http-proxy-agent "^7.0.2"
     https-proxy-agent "^7"
 
-"@alemonjs/db@^0.0.17":
-  version "0.0.17"
-  resolved "https://registry.npmmirror.com/@alemonjs/db/-/db-0.0.17.tgz#0718fc4b89fe4e2069394486550fbb542b1bbe66"
-  integrity sha512-VkH+5oAB5azxG4cn0+H9nup2nZSEUgpayFqMb+4/D95HPWub3ck+uWzftZqlpysSE6EkMLSBf1uPIiVh0Mbcmg==
+"@alemonjs/db@^0.0.21":
+  version "0.0.21"
+  resolved "https://registry.npmmirror.com/@alemonjs/db/-/db-0.0.21.tgz#f2f183486f470620833b0dd4ae6f19910571246f"
+  integrity sha512-2hlHS2c1+23We++9hNFuZvccSWtDwAePlX8ZdjjZZ77xwnLcMmpKG2/Q1LmZ1OAIUe/HFPRJBqjja10rrjEqvw==
   dependencies:
     dayjs "^1.11.13"
     ioredis "^5.4.1"
     sequelize "^6.33.0"
 
-"@alemonjs/discord@^2.1.23":
-  version "2.1.23"
-  resolved "https://registry.npmmirror.com/@alemonjs/discord/-/discord-2.1.23.tgz#5ba6b4c93f6e5871f26ad77c3daa35e80ab20d51"
-  integrity sha512-tmudnR5ZpRV7AQX9AK67cp59qcATnzN9g+dW01vTDKe8/4MNxOiK0bGA4JF4OaRnSsY6vlMSgXnE+3TK/FP0Wg==
+"@alemonjs/discord@^2.1.27":
+  version "2.1.27"
+  resolved "https://registry.npmmirror.com/@alemonjs/discord/-/discord-2.1.27.tgz#905f3f176ee9251338ea409bfce834ce47f255ac"
+  integrity sha512-D9e3hk+3TyRz8xZpQFBjVg5/FKAVo+WogfWU87ZFm1c1HrhfeHfZC/be7PVeJzz5D2Rt9/QyvxYTA4utdBP/tQ==
   dependencies:
     http-proxy-agent "^7.0.2"
     https-proxy-agent "^7"
 
-"@alemonjs/kook@^2.1.11":
-  version "2.1.11"
-  resolved "https://registry.npmmirror.com/@alemonjs/kook/-/kook-2.1.11.tgz#9c1d29a827206315d8f84b2d1c2eaf775557f77e"
-  integrity sha512-nHFYGij0VxycSu9Qc4FBnvHhyll3gRQLkAXy0srFpPwhnR8/1yq5GnUx26o8PQuTC/OEX7c1BCbW+lBoyVenQw==
+"@alemonjs/kook@^2.1.15":
+  version "2.1.15"
+  resolved "https://registry.npmmirror.com/@alemonjs/kook/-/kook-2.1.15.tgz#4fee4970324f67f3af0f69135dbbed70db4b0cfa"
+  integrity sha512-CagJ+WAwiCzcgB+TsFg42UvXVp5VSxFC6qbYuGrevkt1igYrJeh4TVpzXUqtsSXxUQFytpGtHVpm/1mBs9L3Cw==
 
-"@alemonjs/onebot@^2.1.16":
-  version "2.1.16"
-  resolved "https://registry.npmmirror.com/@alemonjs/onebot/-/onebot-2.1.16.tgz#288a6efa762904bfd5bc56600436f4588915edeb"
-  integrity sha512-Dt7OvNmLfBDECotnX+crJvjSxGeESc9bjXWMzU6NF+5vzqYqisMCFkfACLIc7OmFjYxnYjFYmT1X89feIZA9Og==
+"@alemonjs/onebot@^2.1.23":
+  version "2.1.23"
+  resolved "https://registry.npmmirror.com/@alemonjs/onebot/-/onebot-2.1.23.tgz#d7adef8ceea627b36c587a842aa83ddb49817705"
+  integrity sha512-Cu/nF67IbP3lXQbEjMc/SWA1MYtOl8JRRefbVuBY6Iu6kHtxTXBQMnlt6ylq1oHS+Hm7zUHHphSatHnG4vm1wQ==
   dependencies:
     dayjs "^1.11.13"
     ws "^8.18.1"
 
-"@alemonjs/qq-bot@^2.1.23":
-  version "2.1.23"
-  resolved "https://registry.npmmirror.com/@alemonjs/qq-bot/-/qq-bot-2.1.23.tgz#78d74703c481ae604af8149e71c2906e679cc6b9"
-  integrity sha512-8v5DC9LtUKiEcTYBAI73HLNyIVTF4I22PaNXkFPnF5Fxj2zqOWk/YBkKJ+hHO14WNKpGoQIOgWk8+Szw6NPL2A==
+"@alemonjs/qq-bot@^2.1.44":
+  version "2.1.44"
+  resolved "https://registry.npmmirror.com/@alemonjs/qq-bot/-/qq-bot-2.1.44.tgz#e9f9c7b1faea5ae31a665e145ac5da83b8a1e7b1"
+  integrity sha512-aOoqhLWDdG2e44zwQfTupLHzDn1rXRrZoHYzTmyrvUkmD4E/DueYcZlNtrdWMVzcD4MUfn3uCPn+meEZkfR7/Q==
   dependencies:
     "@noble/curves" "^1.7.0"
     axios "^1.4.0"
@@ -57,8 +57,9 @@
     mime-types "^2.1.35"
     public-ip "^6.0.1"
     qrcode "^1.5.3"
-    uuid "^11.0.3"
+    uuid "^14.0.1"
     ws "^8.13.0"
+    yaml "^2.5.1"
 
 "@alloc/quick-lru@^5.2.0":
   version "5.2.0"
@@ -938,27 +939,27 @@ ajv@^6.14.0:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-alemonjs@^2.1.83-alpha.8:
-  version "2.1.83-alpha.8"
-  resolved "https://registry.npmmirror.com/alemonjs/-/alemonjs-2.1.83-alpha.8.tgz#80c2380d021b1c75eda8cec07c48e111cb23bf97"
-  integrity sha512-gWZIjX/pTOVln8XO/RUDLsLzxHpOv+w5fMKHy4Y3k1xcxzqFuPCTHmGVkjrkahoW2FdR4+8aSjAMeP/HGM0vag==
+alemonjs@^2.1.119:
+  version "2.1.119"
+  resolved "https://registry.npmmirror.com/alemonjs/-/alemonjs-2.1.119.tgz#9e54c160d47b854a4fc0dea4b54229c50a900b8e"
+  integrity sha512-+QfW4VDxrTsAycYJoHfy6YixPWCfPXrndGCcLXHZbhUibUl26tmNLONaoa+ncDtZc37ORvsq1D9sstkEj22usg==
   dependencies:
     "@koa/cors" "^5.0.0"
     axios "^1.14.0"
-    chalk "^5.6.2"
+    caller-path "^4.0.0"
     commander "^13.1.0"
     cron "^4.4.0"
+    cross-spawn "^7.0.6"
     file-type "21.0.0"
     flatted "^3.3.3"
     https-proxy-agent "^9.0.0"
     koa "^3.0.1"
     koa-router "^14.0.0"
-    koa-static "^5.0.0"
+    lodash-es "^4.18.1"
     log4js "^6.9.1"
     mime-types "^3.0.1"
     public-ip "^7.0.1"
     qrcode "^1.5.4"
-    uuid "11.1.0"
     ws "^8.18.0"
     yaml "^2.5.1"
 
@@ -1322,10 +1323,29 @@ call-bound@^1.0.2, call-bound@^1.0.3, call-bound@^1.0.4:
     call-bind-apply-helpers "^1.0.2"
     get-intrinsic "^1.3.0"
 
+caller-callsite@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmmirror.com/caller-callsite/-/caller-callsite-5.0.0.tgz#e95f38263a0aa0c74ed339bc417ef5281647bdd5"
+  integrity sha512-l3+xZHsuNlFjchy1nl1kpQwi7PhKHgtQ7MOx5ijHwlouAjnwRNjq3AlxH8SGuWiF5XAhb/mSH+c90LIDFjJKtA==
+  dependencies:
+    callsites "^4.0.0"
+
+caller-path@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmmirror.com/caller-path/-/caller-path-4.0.0.tgz#6509f6ba633c9db306bb6de9e86295383aa1e1af"
+  integrity sha512-18JFq7TTe4+cDKsyZETRk/IS9Xka3dRcU9VWm1C6XlkAjKPSR2bskpDSUHVQw7gvef34bi1gltzmCxToUw1oQw==
+  dependencies:
+    caller-callsite "^5.0.0"
+
 callsites@^3.0.0:
   version "3.1.0"
   resolved "https://registry.npmmirror.com/callsites/-/callsites-3.1.0.tgz#b3630abd8943432f54b3f0519238e33cd7df2f73"
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
+
+callsites@^4.0.0:
+  version "4.2.0"
+  resolved "https://registry.npmmirror.com/callsites/-/callsites-4.2.0.tgz#98761d5be3ce092e4b9c92f7fb8c8eb9b83cadc8"
+  integrity sha512-kfzR4zzQtAE9PC7CzZsjl3aBNbXWuXiSeOCdLcPpBfGW8YuCqQHcRPFDbr/BPVmd3EEPVpuFzLyuT/cUhPr4OQ==
 
 camelcase-css@^2.0.1:
   version "2.0.1"
@@ -1359,11 +1379,6 @@ chalk@^4.0.0:
   dependencies:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
-
-chalk@^5.6.2:
-  version "5.6.2"
-  resolved "https://registry.npmmirror.com/chalk/-/chalk-5.6.2.tgz#b1238b6e23ea337af71c7f8a295db5af0c158aea"
-  integrity sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==
 
 charenc@0.0.2:
   version "0.0.2"
@@ -3616,6 +3631,11 @@ lodash-es@^4.17.21:
   version "4.17.23"
   resolved "https://registry.npmmirror.com/lodash-es/-/lodash-es-4.17.23.tgz#58c4360fd1b5d33afc6c0bbd3d1149349b1138e0"
   integrity sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==
+
+lodash-es@^4.18.1:
+  version "4.18.1"
+  resolved "https://registry.npmmirror.com/lodash-es/-/lodash-es-4.18.1.tgz#b962eeb80d9d983a900bf342961fb7418ca10b1d"
+  integrity sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==
 
 lodash.defaults@^4.2.0:
   version "4.2.0"
@@ -5967,10 +5987,10 @@ util-deprecate@^1.0.2:
   resolved "https://registry.npmmirror.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
-uuid@11.1.0, uuid@^11.0.3:
-  version "11.1.0"
-  resolved "https://registry.npmmirror.com/uuid/-/uuid-11.1.0.tgz#9549028be1753bb934fc96e2bca09bb4105ae912"
-  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
+uuid@^14.0.1:
+  version "14.0.3"
+  resolved "https://registry.npmmirror.com/uuid/-/uuid-14.0.3.tgz#48c9b0dcf5a42d983c23162399eeb9af8b2cc617"
+  integrity sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==
 
 uuid@^8.3.2:
   version "8.3.2"

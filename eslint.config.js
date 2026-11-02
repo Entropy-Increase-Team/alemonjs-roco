@@ -9,9 +9,12 @@ export default [
   // 忽略不需要检查的文件和目录
   {
     ignores: [
+      'frontend/**',
       'lib/**',
+      'runtime/**',
       'logs/**',
       'dist/**',
+      'dist-desktop/**',
       'node_modules/**',
       '**/*.css',
       '**/*.jpg',
@@ -22,12 +25,8 @@ export default [
       '*.config.js',
       '*.config.ts',
       '.puppeteerrc.cjs',
-      'postcss.config.cjs',
-      'metrics.js',
-      'index.js',
-      'scripts/**',
-      'src/env.d.ts',
-    ],
+      'src/env.d.ts'
+    ]
   },
   // TypeScript 声明文件配置 - 放宽注释规则
   {
@@ -83,7 +82,6 @@ export default [
     }
   },
   // 关闭与 Prettier 冲突的格式化规则
-  prettier,
   // 主要代码质量规则配置
   {
     languageOptions: {
@@ -113,7 +111,7 @@ export default [
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-inferrable-types': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
@@ -178,7 +176,7 @@ export default [
       // 禁止使用制表符，统一使用空格
       'no-tabs': 'error',
       // 运算符换行规则 - 运算符放在行首
-      // 'operator-linebreak': ['error', 'before'],
+      'operator-linebreak': ['error', 'before'],
       // 禁止块级代码前后有空行
       'padded-blocks': ['error', 'never'],
       // 语句间空行规则
@@ -204,5 +202,14 @@ export default [
       // 模板标签间距规则
       'template-tag-spacing': 'error'
     }
-  }
+  },
+  // JavaScript files have no TypeScript project services. Keep syntax rules,
+  // but disable every rule that requires type information.
+  {
+    ...ts.configs.disableTypeChecked,
+    files: ['**/*.{js,mjs,cjs}']
+  },
+  // Keep this last: custom style rules above must not re-enable rules that
+  // conflict with the formatter used by the pre-commit hook.
+  prettier
 ];

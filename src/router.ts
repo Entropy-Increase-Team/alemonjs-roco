@@ -327,10 +327,7 @@ baseGroup.use(
   },
   () => import('@src/response/skillSearch')
 );
-baseGroup.use(
-  ['roco活动', '洛克活动', '洛克王国活动', 'roco日历', '洛克日历', '洛克王国日历', 'rocohdrl', '洛克hdrl', '洛克王国hdrl'],
-  () => import('@src/response/active')
-);
+baseGroup.use(['roco活动', '洛克活动', '洛克王国活动', 'rocohdrl', '洛克hdrl', '洛克王国hdrl'], () => import('@src/response/active'));
 baseGroup.use(['roco公告', '洛克公告', '洛克王国公告'], () => import('@src/response/announcement'));
 
 /**

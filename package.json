@@ -1,6 +1,6 @@
 {
   "name": "alemonjs-roco",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "mhy-mod",
   "author": "ningmengchongshui",
   "type": "module",
@@ -52,5 +52,5 @@
     "type": "git",
     "url": "https://github.com/xiuxianjs/alemonjs-roco.git"
   },
-  "gitHead": "9b799621b3e7a2a1589b69b1818afdaf65f3d604"
+  "gitHead": "6e524dee61c13c57d2ffc483077732e3fc1b1dd0"
 }

@@ -11,8 +11,11 @@ import { getRocomAccounts, buildRocomAccountsText } from '../model/rocomAccount'
 import { getRocomProfile, buildRocomProfileText } from '../model/rocomQuery';
 import { getRocomHome, buildRocomHomeText, getRocomRecord, buildRocomRecordText } from '../model/rocomExtraQuery';
 
+const capabilityCard = { displayName: '洛克王国', entryCommand: '/洛克帮助' };
+
 export const rocoExpose = Expose.create().provide({
   name: 'roco',
+  ...capabilityCard,
   version: '2.0.0',
   description: '洛克王国资料查询、账号管理、交换及订阅操作；身份来自当前消息，管理接口校验机器人管理员。',
   actions: {
@@ -27,7 +30,8 @@ export const rocoExpose = Expose.create().provide({
       return buildRocomAccountsText(result.accounts, result.bindingsTotal);
     }),
     get_profile: query('查询当前消息用户已登录角色的档案', emptyInput, async (_input, user) => buildRocomProfileText(await getRocomProfile(user))),
-    get_home: query<{ uid?: string }>('查询家园，省略 UID 时使用当前绑定角色', object({ uid: text }), async (input, user) => buildRocomHomeText(await getRocomHome(user, input.uid ? uid(input.uid) : ''))
+    get_home: query<{ uid?: string }>('查询家园，省略 UID 时使用当前绑定角色', object({ uid: text }), async (input, user) =>
+      buildRocomHomeText(await getRocomHome(user, input.uid ? uid(input.uid) : ''))
     ),
     get_record: query<{ page?: number }>(
       '分页查询当前消息用户的大赛战绩',
